@@ -2,12 +2,40 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { SITE_BASE_PATH } from "./lib/site";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
 
+type WorkerAssetsBinding = {
+  fetch: (request: Request) => Promise<Response> | Response;
+};
+
+type WorkerEnv = {
+  ASSETS?: WorkerAssetsBinding;
+};
+
 let serverEntryPromise: Promise<ServerEntry> | undefined;
+
+const STATIC_ASSET_EXTENSIONS = [
+  ".css",
+  ".js",
+  ".mjs",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+  ".svg",
+  ".ico",
+  ".woff",
+  ".woff2",
+  ".ttf",
+  ".otf",
+  ".mp4",
+  ".webmanifest",
+  ".json",
+] as const;
 
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {
@@ -37,9 +65,36 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   });
 }
 
+function isStaticAssetRequest(request: Request) {
+  const { pathname } = new URL(request.url);
+
+  if (!pathname.startsWith(`${SITE_BASE_PATH}/`)) return false;
+
+  return STATIC_ASSET_EXTENSIONS.some((extension) => pathname.endsWith(extension));
+}
+
+async function maybeServeStaticAsset(request: Request, env: unknown) {
+  if (!isStaticAssetRequest(request)) return null;
+
+  const assets = (env as WorkerEnv | undefined)?.ASSETS;
+  if (!assets?.fetch) return null;
+
+  const assetResponse = await assets.fetch(request);
+  if (assetResponse.status !== 404) {
+    return assetResponse;
+  }
+
+  return null;
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const staticAssetResponse = await maybeServeStaticAsset(request, env);
+      if (staticAssetResponse) {
+        return staticAssetResponse;
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
