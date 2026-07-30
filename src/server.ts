@@ -79,7 +79,11 @@ async function maybeServeStaticAsset(request: Request, env: unknown) {
   const assets = (env as WorkerEnv | undefined)?.ASSETS;
   if (!assets?.fetch) return null;
 
-  const assetResponse = await assets.fetch(request);
+  const assetUrl = new URL(request.url);
+  assetUrl.pathname = assetUrl.pathname.replace(SITE_BASE_PATH, "") || "/";
+
+  const assetRequest = new Request(assetUrl.toString(), request);
+  const assetResponse = await assets.fetch(assetRequest);
   if (assetResponse.status !== 404) {
     return assetResponse;
   }
