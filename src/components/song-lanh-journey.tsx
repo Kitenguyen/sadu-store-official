@@ -106,10 +106,12 @@ const JOURNEY_CARDS = [
 ] as const;
 
 type JourneyCard = (typeof JOURNEY_CARDS)[number];
+type JourneyCardId = JourneyCard["id"];
+type JourneySlotId = (typeof SLOT_POOL)[number]["id"];
 type JourneyLeaf = {
   id: string;
-  slotId: string;
-  cardId: string;
+  slotId: JourneySlotId;
+  cardId: JourneyCardId;
   fragment: (typeof FRAGMENTS)[number];
   fragmentIndex: number;
 };
