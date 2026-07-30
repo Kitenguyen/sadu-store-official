@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useCart } from "../lib/cart-context";
 import { formatVnd } from "../lib/products";
+import { assetUrl } from "../lib/site";
 
 const CONTACT_PHONE = "0355532863";
 const ZALO_URL = `https://zalo.me/${CONTACT_PHONE}`;
@@ -526,7 +527,7 @@ export function SupportBubble() {
               rel="noreferrer"
               className="flex items-center gap-3 rounded-2xl border border-[#1E5B38]/10 bg-[#f8fbff] px-4 py-3 text-sm font-semibold text-[#1266f1]"
             >
-              <img src="/assets/icons/zalo.webp" alt="Zalo" className="h-6 w-6 rounded-full object-cover" />
+              <img src={assetUrl("/assets/icons/zalo.webp")} alt="Zalo" className="h-6 w-6 rounded-full object-cover" />
               Nhắn Zalo {CONTACT_PHONE}
             </a>
           </div>
@@ -538,7 +539,7 @@ export function SupportBubble() {
         onClick={() => setOpen((v) => !v)}
         className="flex h-13 w-13 animate-[pulse_3s_ease-in-out_infinite] items-center justify-center rounded-full bg-white shadow-[0_10px_25px_-8px_rgba(0,0,0,0.35)] transition active:scale-90"
       >
-        <img src="/assets/icons/zalo.webp" alt="Zalo" className="h-9 w-9 rounded-full object-cover" />
+        <img src={assetUrl("/assets/icons/zalo.webp")} alt="Zalo" className="h-9 w-9 rounded-full object-cover" />
       </button>
     </div>
   );

@@ -9,6 +9,7 @@ import svgr from "vite-plugin-svgr";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { fileURLToPath } from "node:url";
+import { SITE_BASE_PATH } from "./src/lib/site";
 
 const QUANTA_ICONS_SHIM = fileURLToPath(
   new URL("./src/lib/quanta-material-icons.ts", import.meta.url),
@@ -19,6 +20,7 @@ export default defineConfig(({ mode, command }) => {
   const isBuild = command === "build";
 
   return {
+    base: `${SITE_BASE_PATH}/`,
     resolve: {
       alias: [{ find: /^@higgsfield-ai\/icons(\/.*)?$/, replacement: QUANTA_ICONS_SHIM }],
     },

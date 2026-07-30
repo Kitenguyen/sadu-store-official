@@ -1,6 +1,8 @@
+import { assetUrl } from "../lib/site";
+
 const ITEMS = [
   {
-    icon: "/assets/icons/leaf.png",
+    icon: assetUrl("/assets/icons/leaf.png"),
     title: "Nguyên liệu tự nhiên",
     body: "Thảo dược hái tay từ vùng cao nguyên, không thuốc trừ sâu, không chất hóa học.",
     span: "md:col-span-2 md:row-span-2",
@@ -8,28 +10,28 @@ const ITEMS = [
     invert: true,
   },
   {
-    icon: "/assets/icons/shield.png",
+    icon: assetUrl("/assets/icons/shield.png"),
     title: "Đổi trả 7 ngày",
     body: "Giữ theo thông tin trên hình sản phẩm và chính sách đổi trả đã được cập nhật lại ở footer.",
     span: "md:col-span-1",
     tone: "bg-white text-[#222222]",
   },
   {
-    icon: "/assets/icons/truck.png",
+    icon: assetUrl("/assets/icons/truck.png"),
     title: "Free ship từ 250.000đ",
     body: "Thông điệp giao hàng đã được đồng bộ ở banner, cart drawer và phần liên hệ.",
     span: "md:col-span-1",
     tone: "bg-[#BFD8C3]/60 text-[#222222]",
   },
   {
-    icon: "/assets/icons/nochem.png",
+    icon: assetUrl("/assets/icons/nochem.png"),
     title: "Không chất bảo quản",
     body: "Sấy khô tự nhiên, không phụ gia, an toàn cho cả gia đình.",
     span: "md:col-span-1",
     tone: "bg-white text-[#222222]",
   },
   {
-    icon: "/assets/icons/cup.png",
+    icon: assetUrl("/assets/icons/cup.png"),
     title: "Ưu đãi rõ ràng",
     body: "Sản phẩm khuyến mại hiển thị giá cũ, giá mới và badge giảm giá để khách dễ quyết định.",
     span: "md:col-span-1",

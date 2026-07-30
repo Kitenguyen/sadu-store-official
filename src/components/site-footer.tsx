@@ -1,3 +1,5 @@
+import { assetUrl } from "../lib/site";
+
 const CONTACT_PHONE = "0355532863";
 
 const QUICK_LINKS = [
@@ -16,7 +18,7 @@ export function SiteFooter() {
             <div>
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white/12">
-                  <img src="/assets/brand/mark.png" alt="" aria-hidden="true" className="h-full w-full object-cover" />
+                  <img src={assetUrl("/assets/brand/mark.png")} alt="" aria-hidden="true" className="h-full w-full object-cover" />
                 </span>
                 <div>
                   <p className="text-lg font-extrabold tracking-tight">SADU</p>

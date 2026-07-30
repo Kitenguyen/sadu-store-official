@@ -14,8 +14,12 @@ import { SiteNav } from "../components/site-nav";
 import { SongLanhJourney } from "../components/song-lanh-journey";
 import { WhyChooseUs } from "../components/why-choose-us";
 import { CartProvider } from "../lib/cart-context";
+import { assetUrl, SITE_URL } from "../lib/site";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    links: [{ rel: "canonical", href: SITE_URL }],
+  }),
   component: Index,
 });
 
@@ -33,10 +37,10 @@ const SCENES: ScrollScrubScene[] = [
     kicker: "SADU · Từ núi rừng đến tách trà",
     title: "Nguồn cội nguyên sơ",
     body: "Thảo dược mọc tự nhiên trên những sườn đồi cao nguyên, đón nắng sớm và sương mù mỗi ban mai.",
-    poster: "/assets/world/scene-01-poster.jpg",
-    mobilePoster: "/assets/world/scene-01-mobile-poster.jpg",
-    clip: "/assets/world/scene-01.mp4",
-    mobileClip: "/assets/world/scene-01-mobile.mp4",
+    poster: assetUrl("/assets/world/scene-01-poster.jpg"),
+    mobilePoster: assetUrl("/assets/world/scene-01-mobile-poster.jpg"),
+    clip: assetUrl("/assets/world/scene-01.mp4"),
+    mobileClip: assetUrl("/assets/world/scene-01-mobile.mp4"),
     align: "left",
     scroll: 1.5,
   },
@@ -47,10 +51,10 @@ const SCENES: ScrollScrubScene[] = [
     title: "Hái bằng tay, chọn từng lá",
     body: "Người nông dân chọn hái từng lá đạt độ trưởng thành tốt nhất, đúng thời điểm để giữ trọn dưỡng chất.",
     tags: ["VietGAP", "Hái thủ công"],
-    poster: "/assets/world/scene-02-poster.jpg",
-    mobilePoster: "/assets/world/scene-02-mobile-poster.jpg",
-    clip: "/assets/world/scene-02.mp4",
-    mobileClip: "/assets/world/scene-02-mobile.mp4",
+    poster: assetUrl("/assets/world/scene-02-poster.jpg"),
+    mobilePoster: assetUrl("/assets/world/scene-02-mobile-poster.jpg"),
+    clip: assetUrl("/assets/world/scene-02.mp4"),
+    mobileClip: assetUrl("/assets/world/scene-02-mobile.mp4"),
     align: "left",
     scroll: 1.5,
   },
@@ -61,10 +65,10 @@ const SCENES: ScrollScrubScene[] = [
     title: "Sấy tự nhiên, giữ trọn dưỡng chất",
     body: "Lá thảo dược được phơi và sấy ở nhiệt độ thấp trong nhà xưởng đạt chuẩn, không dùng phụ gia.",
     tags: ["100% tự nhiên", "Không chất bảo quản"],
-    poster: "/assets/world/scene-03-poster.jpg",
-    mobilePoster: "/assets/world/scene-03-mobile-poster.jpg",
-    clip: "/assets/world/scene-03.mp4",
-    mobileClip: "/assets/world/scene-03-mobile.mp4",
+    poster: assetUrl("/assets/world/scene-03-poster.jpg"),
+    mobilePoster: assetUrl("/assets/world/scene-03-mobile-poster.jpg"),
+    clip: assetUrl("/assets/world/scene-03.mp4"),
+    mobileClip: assetUrl("/assets/world/scene-03-mobile.mp4"),
     align: "right",
     scroll: 1.5,
   },
@@ -74,10 +78,10 @@ const SCENES: ScrollScrubScene[] = [
     kicker: "SADU",
     title: "Một tách trà, cả vùng núi rừng",
     body: "Từ cao nguyên đến tách trà nóng trên bàn bạn, mỗi ngụm là một câu chuyện thảo dược Việt Nam.",
-    poster: "/assets/world/scene-04-poster.jpg",
-    mobilePoster: "/assets/world/scene-04-mobile-poster.jpg",
-    clip: "/assets/world/scene-04.mp4",
-    mobileClip: "/assets/world/scene-04-mobile.mp4",
+    poster: assetUrl("/assets/world/scene-04-poster.jpg"),
+    mobilePoster: assetUrl("/assets/world/scene-04-mobile-poster.jpg"),
+    clip: assetUrl("/assets/world/scene-04.mp4"),
+    mobileClip: assetUrl("/assets/world/scene-04-mobile.mp4"),
     align: "left",
     scroll: 1.6,
     actions: <HeroActions />,

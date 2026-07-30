@@ -1,4 +1,5 @@
 import { comboProducts, mateProducts, promotionProducts } from "../lib/products";
+import { assetUrl } from "../lib/site";
 import { ProductCard } from "./product-card";
 
 function SectionHeader({
@@ -29,7 +30,7 @@ export function FeaturedProducts() {
   return (
     <section id="products" className="relative overflow-hidden bg-[#F4F2EB] py-20 md:py-28">
       <img
-        src="/assets/plates/paper-grain.jpg"
+        src={assetUrl("/assets/plates/paper-grain.jpg")}
         alt=""
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40 mix-blend-multiply"

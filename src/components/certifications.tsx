@@ -1,53 +1,55 @@
+import { assetUrl } from "../lib/site";
+
 const CERTS = [
   {
     label: "Thương hiệu vàng 2024",
     detail: "Chứng nhận thương hiệu vàng nông nghiệp Việt Nam",
-    image: "/assets/certifications/thuong-hieu-vang-2024.jpg",
+    image: assetUrl("/assets/certifications/thuong-hieu-vang-2024.jpg"),
   },
   {
     label: "ATTP 2023",
     detail: "Giấy chứng nhận cơ sở đủ điều kiện an toàn thực phẩm",
-    image: "/assets/certifications/an-toan-thuc-pham-2023.jpg",
+    image: assetUrl("/assets/certifications/an-toan-thuc-pham-2023.jpg"),
   },
   {
     label: "Top 2 năm 2025",
     detail: "Hàng Việt Nam được người tiêu dùng yêu thích",
-    image: "/assets/certifications/top-2-2025.jpg",
+    image: assetUrl("/assets/certifications/top-2-2025.jpg"),
   },
   {
     label: "OCOP Cà Gai Leo",
     detail: "Sản phẩm trà túi lọc cà gai leo đạt 4 sao",
-    image: "/assets/certifications/ocop-ca-gai-leo-2023.jpg",
+    image: assetUrl("/assets/certifications/ocop-ca-gai-leo-2023.jpg"),
   },
   {
     label: "OCOP Đinh Lăng 2024",
     detail: "Trà đinh lăng túi lọc đạt chứng nhận 4 sao",
-    image: "/assets/certifications/ocop-dinh-lang-2024.jpg",
+    image: assetUrl("/assets/certifications/ocop-dinh-lang-2024.jpg"),
   },
   {
     label: "OCOP Đinh Lăng 2023",
     detail: "Trà túi lọc cà gai leo đinh lăng đạt 4 sao",
-    image: "/assets/certifications/ocop-dinh-lang-2023.jpg",
+    image: assetUrl("/assets/certifications/ocop-dinh-lang-2023.jpg"),
   },
   {
     label: "OCOP Dây Đau Xương",
     detail: "Trà dây đau xương cà gai leo túi lọc đạt 4 sao",
-    image: "/assets/certifications/ocop-day-dau-xuong-2024.jpg",
+    image: assetUrl("/assets/certifications/ocop-day-dau-xuong-2024.jpg"),
   },
   {
     label: "OCOP Trà Phúc",
     detail: "Sản phẩm trà phúc đạt 4 sao tiềm năng 5 sao",
-    image: "/assets/certifications/ocop-tra-phuc-2024.jpg",
+    image: assetUrl("/assets/certifications/ocop-tra-phuc-2024.jpg"),
   },
   {
     label: "OCOP Xạ Đen La Hán",
     detail: "Trà xạ đen la hán quả túi lọc đạt 4 sao",
-    image: "/assets/certifications/ocop-xa-den-la-han-2024.jpg",
+    image: assetUrl("/assets/certifications/ocop-xa-den-la-han-2024.jpg"),
   },
   {
     label: "OCOP Trà Gừng",
     detail: "Trà gừng túi lọc đạt chứng nhận 4 sao",
-    image: "/assets/certifications/ocop-tra-gung-2024.jpg",
+    image: assetUrl("/assets/certifications/ocop-tra-gung-2024.jpg"),
   },
 ];
 

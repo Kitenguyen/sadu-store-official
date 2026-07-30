@@ -1,15 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { SITE_URL } from '../lib/site'
 
 export const Route = createFileRoute('/robots.txt')({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const origin = new URL(request.url).origin
         const body = [
           'User-agent: *',
-          'Allow: /',
+          'Allow: /mate-store',
           '',
-          `Sitemap: ${origin}/sitemap.xml`,
+          `Sitemap: ${SITE_URL}/sitemap.xml`,
         ].join('\n')
         return new Response(body, {
           headers: {

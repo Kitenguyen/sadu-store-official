@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { SITE_URL, withBasePath } from "../lib/site";
 import { Toaster } from "../components/ui/sonner";
 import "../styles.css";
 
@@ -10,6 +11,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "SADU" },
+      { name: "description", content: "Landing page trà SADU Mate tại www.sadu.com.vn/mate-store" },
+      { property: "og:url", content: SITE_URL },
+    ],
+    links: [
+      { rel: "canonical", href: SITE_URL },
+      { rel: "icon", href: withBasePath("/favicon.ico") },
+      { rel: "apple-touch-icon", href: withBasePath("/apple-touch-icon.png") },
+      { rel: "manifest", href: withBasePath("/site.webmanifest") },
     ],
   }),
   shellComponent: RootShell,

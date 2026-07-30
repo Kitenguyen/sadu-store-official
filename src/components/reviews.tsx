@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { assetUrl } from "../lib/site";
 
 const REVIEWS = [
   {
@@ -31,7 +32,7 @@ export function Reviews() {
   return (
     <section className="relative mx-auto max-w-[1440px] overflow-hidden px-5 py-20 md:px-10 md:py-28">
       <img
-        src="/assets/plates/botanical-wash.webp"
+        src={assetUrl("/assets/plates/botanical-wash.webp")}
         alt=""
         aria-hidden="true"
         className="pointer-events-none absolute -right-24 -top-16 h-[26rem] w-[26rem] object-contain opacity-[0.14]"

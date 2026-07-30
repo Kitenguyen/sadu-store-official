@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useCart } from "../lib/cart-context";
+import { assetUrl } from "../lib/site";
 
 const NAV_LINKS = [
   { href: "#categories", label: "Danh mục" },
@@ -43,7 +44,7 @@ export function SiteNav() {
               scrolled ? "bg-[#1E5B38]" : "bg-white/15 backdrop-blur-md"
             }`}
           >
-            <img src="/assets/brand/mark.png" alt="" aria-hidden="true" className="h-full w-full object-cover" />
+            <img src={assetUrl("/assets/brand/mark.png")} alt="" aria-hidden="true" className="h-full w-full object-cover" />
           </span>
           <span className={`text-lg font-extrabold tracking-tight ${scrolled ? "text-[#1E5B38]" : "text-white"}`}>
             SADU

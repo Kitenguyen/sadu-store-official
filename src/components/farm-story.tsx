@@ -1,21 +1,23 @@
+import { assetUrl } from "../lib/site";
+
 const STEPS = [
   {
     year: "Bước 1",
     title: "Gieo trồng tự nhiên",
     body: "Vùng nguyên liệu SADU được chăm sóc theo hướng sạch và bền vững, ưu tiên độ lành của đất, nguồn nước và nhịp sinh trưởng tự nhiên của cây.",
-    image: "/assets/farm/farm-step-1.png",
+    image: assetUrl("/assets/farm/farm-step-1.png"),
   },
   {
     year: "Bước 2",
     title: "Thu hái đúng thời điểm",
     body: "Người làm vườn thu hái thủ công theo từng đợt, chọn phần nguyên liệu đạt độ tươi tốt nhất để giữ được hương thơm và dược tính tự nhiên.",
-    image: "/assets/farm/farm-step-2.png",
+    image: assetUrl("/assets/farm/farm-step-2.png"),
   },
   {
     year: "Bước 3",
     title: "Sấy khô và hoàn thiện",
     body: "Nguyên liệu sau thu hoạch được làm sạch, sấy ở nhiệt độ phù hợp và đóng gói trong quy trình kiểm soát chặt chẽ để giữ trọn chất lượng.",
-    image: "/assets/farm/drying.jpg",
+    image: assetUrl("/assets/farm/drying.jpg"),
   },
 ];
 
