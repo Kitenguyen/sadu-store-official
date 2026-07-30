@@ -1,0 +1,634 @@
+import { useEffect, useMemo, useState } from "react";
+import { useCart } from "../lib/cart-context";
+import { formatVnd } from "../lib/products";
+
+const CONTACT_PHONE = "0355532863";
+const ZALO_URL = `https://zalo.me/${CONTACT_PHONE}`;
+const VOUCHER_CODE = "SONGLANH";
+const VOUCHER_DISCOUNT = 5000;
+const SHIPPING_FEE = 30000;
+const VOUCHER_STORAGE_KEY = "sadu-voucher-songlanh-claimed";
+const VOUCHER_UNLOCK_EVENT = "sadu:voucher-unlocked";
+
+function GiftSummary({ mateGiftCount }: { mateGiftCount: number }) {
+  if (mateGiftCount <= 0) return null;
+
+  return (
+    <div className="rounded-2xl border border-[#D6B36A]/30 bg-[#fff8eb] p-3 text-sm text-[#6d4c1d]">
+      <p className="font-semibold">Ưu đãi Trà Mate đã kích hoạt</p>
+      <p className="mt-1 text-xs leading-relaxed text-[#6d4c1d]/80">
+        Bạn được tặng <span className="font-bold">{mateGiftCount} hộp Trà Mate bất kỳ</span> vì đã mua đủ{" "}
+        {mateGiftCount >= 2 ? "5" : "3"} sản phẩm Trà Mate trở lên.
+      </p>
+    </div>
+  );
+}
+
+function CheckoutModal() {
+  const { lines, isCheckoutOpen, closeCheckout, clearCart, subtotal } = useCart();
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [couponClaimed, setCouponClaimed] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [customer, setCustomer] = useState({
+    name: "",
+    phone: "",
+    address: "",
+    note: "",
+    payment: "cod",
+  });
+
+  const mateCount = useMemo(
+    () =>
+      lines
+        .filter((line) => line.product.category === "tra-mate")
+        .reduce((sum, line) => sum + line.quantity, 0),
+    [lines],
+  );
+  const mateGiftCount = mateCount >= 5 ? 2 : mateCount >= 3 ? 1 : 0;
+  const shipping = subtotal >= 250000 ? 0 : lines.length > 0 ? SHIPPING_FEE : 0;
+  const discount = couponApplied && couponCode.trim().toUpperCase() === VOUCHER_CODE ? VOUCHER_DISCOUNT : 0;
+  const grandTotal = Math.max(0, subtotal + shipping - discount);
+
+  useEffect(() => {
+    const syncClaimState = () => {
+      const claimed = window.localStorage.getItem(VOUCHER_STORAGE_KEY) === "1";
+      setCouponClaimed(claimed);
+    };
+
+    syncClaimState();
+    window.addEventListener(VOUCHER_UNLOCK_EVENT, syncClaimState);
+    window.addEventListener("storage", syncClaimState);
+
+    return () => {
+      window.removeEventListener(VOUCHER_UNLOCK_EVENT, syncClaimState);
+      window.removeEventListener("storage", syncClaimState);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!couponClaimed) return;
+    setCouponCode((prev) => prev || VOUCHER_CODE);
+    setCouponApplied(true);
+  }, [couponClaimed]);
+
+  useEffect(() => {
+    if (!isCheckoutOpen || !couponClaimed) return;
+    setCouponCode(VOUCHER_CODE);
+    setCouponApplied(true);
+  }, [couponClaimed, isCheckoutOpen]);
+
+  useEffect(() => {
+    if (!isCheckoutOpen) {
+      setSubmitted(false);
+      setCouponCode("");
+      setCouponApplied(false);
+    }
+  }, [isCheckoutOpen]);
+
+  if (!isCheckoutOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[90]">
+      <button
+        type="button"
+        aria-label="Đóng form thanh toán"
+        onClick={closeCheckout}
+        className="absolute inset-0 bg-[#0f1f17]/55 backdrop-blur-[3px]"
+      />
+
+      <div className="absolute inset-x-0 bottom-0 top-0 mx-auto flex max-w-6xl items-center justify-center p-3 md:p-6">
+        <div className="relative grid max-h-[92vh] w-full overflow-hidden rounded-[32px] bg-[#FAF9F5] shadow-[0_40px_100px_-40px_rgba(0,0,0,0.5)] md:grid-cols-[1.1fr,0.9fr]">
+          <button
+            type="button"
+            aria-label="Đóng"
+            onClick={closeCheckout}
+            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-[#222222] shadow-sm"
+          >
+            ✕
+          </button>
+
+          <div className="overflow-y-auto px-5 py-6 md:px-8 md:py-8">
+            <div className="mb-6">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#1E5B38]/55">Checkout</p>
+              <h2 className="mt-2 text-2xl font-bold tracking-tight text-[#1E5B38] md:text-3xl">
+                Hoàn tất đơn hàng SADU
+              </h2>
+              <p className="mt-2 text-xs font-medium text-[#b5502f]">Đơn dưới 250.000đ sẽ cộng thêm 30.000đ phí ship.</p>
+              <p className="mt-2 max-w-lg text-sm leading-relaxed text-[#222222]/60">
+                Form thanh toán chỉ hiện khi khách bấm “Thanh toán” trong giỏ hàng hoặc “Mua ngay”, giúp landing page
+                gọn và tập trung chốt đơn hơn.
+              </p>
+            </div>
+
+            {submitted ? (
+              <div className="rounded-[28px] bg-white p-6 shadow-sm">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1E5B38] text-white">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M5 12.5l4.5 4.5L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <h3 className="mt-4 text-xl font-bold text-[#1E5B38]">Đã ghi nhận đơn hàng</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#222222]/65">
+                  Cảm ơn {customer.name || "bạn"} đã đặt hàng. Đội ngũ SADU sẽ liên hệ qua số{" "}
+                  <span className="font-semibold">{customer.phone || CONTACT_PHONE}</span> để xác nhận đơn sớm nhất.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <a
+                    href={`tel:${CONTACT_PHONE}`}
+                    className="rounded-full bg-[#1E5B38] px-5 py-3 text-sm font-semibold text-white"
+                  >
+                    Gọi {CONTACT_PHONE}
+                  </a>
+                  <a
+                    href={ZALO_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-full border border-[#1E5B38]/15 bg-white px-5 py-3 text-sm font-semibold text-[#1E5B38]"
+                  >
+                    Nhắn Zalo xác nhận
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearCart();
+                      setCustomer({ name: "", phone: "", address: "", note: "", payment: "cod" });
+                    }}
+                    className="rounded-full border border-black/10 px-5 py-3 text-sm font-semibold text-[#222222]"
+                  >
+                    Xong
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setSubmitted(true);
+                }}
+                className="space-y-4"
+              >
+                <div className="grid gap-4 md:grid-cols-2">
+                  <label className="space-y-2 text-sm">
+                    <span className="font-medium text-[#222222]">Họ và tên</span>
+                    <input
+                      required
+                      value={customer.name}
+                      onChange={(e) => setCustomer((prev) => ({ ...prev, name: e.target.value }))}
+                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#1E5B38]"
+                      placeholder="Nhập họ và tên"
+                    />
+                  </label>
+                  <label className="space-y-2 text-sm">
+                    <span className="font-medium text-[#222222]">Số điện thoại</span>
+                    <input
+                      required
+                      value={customer.phone}
+                      onChange={(e) => setCustomer((prev) => ({ ...prev, phone: e.target.value }))}
+                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#1E5B38]"
+                      placeholder="0355532863"
+                    />
+                  </label>
+                </div>
+
+                <label className="space-y-2 text-sm">
+                  <span className="font-medium text-[#222222]">Địa chỉ nhận hàng</span>
+                  <textarea
+                    required
+                    rows={4}
+                    value={customer.address}
+                    onChange={(e) => setCustomer((prev) => ({ ...prev, address: e.target.value }))}
+                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#1E5B38]"
+                    placeholder="Số nhà, thôn/xóm, xã/phường, quận/huyện, tỉnh/thành"
+                  />
+                </label>
+
+                <label className="space-y-2 text-sm">
+                  <span className="font-medium text-[#222222]">Ghi chú đơn hàng</span>
+                  <textarea
+                    rows={3}
+                    value={customer.note}
+                    onChange={(e) => setCustomer((prev) => ({ ...prev, note: e.target.value }))}
+                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#1E5B38]"
+                    placeholder="Ví dụ: Gọi trước khi giao, giao giờ hành chính..."
+                  />
+                </label>
+
+                <div className="rounded-[28px] bg-white p-4 shadow-sm">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#b5502f]">Voucher 5K</p>
+                      <p className="mt-1 text-sm text-[#222222]/65">Nhập đúng mã sẽ được trừ tiền.</p>
+                    </div>
+                    <div className="rounded-full bg-[#fff3ee] px-3 py-1 text-sm font-bold text-[#b5502f]">
+                      {formatVnd(VOUCHER_DISCOUNT)}
+                    </div>
+                  </div>
+
+                  {!couponClaimed ? (
+                    <div className="rounded-2xl border border-dashed border-[#D6B36A]/40 bg-[#fffdf8] px-4 py-3 text-sm text-[#222222]/70">
+                      Mã <span className="font-bold text-[#1E5B38]">{VOUCHER_CODE}</span> sẽ hoạt động sau khi khách bấm “Lấy mã” ở voucher ngoài landing page.
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                      <input
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        className="w-full rounded-2xl border border-[#D6B36A]/40 bg-[#fffdf8] px-4 py-3 text-sm font-semibold tracking-[0.08em] text-[#1E5B38] outline-none transition focus:border-[#1E5B38]"
+                        placeholder="Nhập mã SONGLANH"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setCouponApplied(couponCode.trim().toUpperCase() === VOUCHER_CODE)}
+                        className="rounded-2xl bg-[#1E5B38] px-5 py-3 text-sm font-semibold text-white"
+                      >
+                        Áp dụng
+                      </button>
+                    </div>
+                  )}
+
+                  <p className="mt-2 text-xs text-[#222222]/55">
+                    {couponApplied && couponCode.trim().toUpperCase() === VOUCHER_CODE
+                      ? `Đã áp dụng mã ${VOUCHER_CODE} thành công.`
+                      : couponClaimed
+                        ? `Nhập đúng mã ${VOUCHER_CODE} để giảm ${formatVnd(VOUCHER_DISCOUNT)}.`
+                        : "Bấm lấy mã ở voucher ngoài landing page để mở ưu đãi."}
+                  </p>
+                </div>
+
+                <div className="rounded-[28px] bg-white p-4 shadow-sm">
+                  <p className="text-sm font-semibold text-[#222222]">Phương thức thanh toán</p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    {[
+                      { id: "cod", label: "Thanh toán khi nhận hàng" },
+                      { id: "bank", label: "Chuyển khoản trước" },
+                    ].map((option) => (
+                      <label
+                        key={option.id}
+                        className={`flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 text-sm transition ${
+                          customer.payment === option.id
+                            ? "border-[#1E5B38] bg-[#1E5B38]/5 text-[#1E5B38]"
+                            : "border-black/10 bg-[#FAF9F5] text-[#222222]"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="payment"
+                          value={option.id}
+                          checked={customer.payment === option.id}
+                          onChange={(e) => setCustomer((prev) => ({ ...prev, payment: e.target.value }))}
+                        />
+                        {option.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={lines.length === 0}
+                  className="w-full rounded-full bg-[#1E5B38] py-4 text-sm font-semibold text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Xác nhận đặt hàng · {formatVnd(grandTotal)}
+                </button>
+              </form>
+            )}
+          </div>
+
+          <div className="overflow-y-auto border-t border-black/8 bg-white px-5 py-6 md:border-l md:border-t-0 md:px-8 md:py-8">
+            <p className="text-lg font-bold text-[#222222]">Tóm tắt đơn hàng</p>
+            <div className="mt-5 space-y-4">
+              {lines.length === 0 ? (
+                <div className="rounded-2xl bg-[#FAF9F5] p-4 text-sm text-[#222222]/55">
+                  Giỏ hàng đang trống. Hãy thêm sản phẩm rồi quay lại thanh toán.
+                </div>
+              ) : (
+                lines.map((line) => (
+                  <div key={line.product.id} className="flex gap-3 rounded-2xl bg-[#FAF9F5] p-3">
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-[#F1EFE7]">
+                      <img src={line.product.image} alt={line.product.name} className="h-full w-full object-cover" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="line-clamp-2 text-sm font-semibold text-[#222222]">{line.product.name}</p>
+                      <div className="mt-2 flex items-center justify-between gap-3 text-xs text-[#222222]/55">
+                        <span>Số lượng: {line.quantity}</span>
+                        <span className={`font-semibold ${line.product.oldPrice ? "text-[#d12f2f]" : "text-[#1E5B38]"}`}>
+                          {formatVnd(line.quantity * line.product.price)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="mt-5 space-y-3 rounded-[28px] bg-[#F7F5EE] p-5">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-[#222222]/60">Tạm tính</span>
+                <span className="font-semibold text-[#222222]">{formatVnd(subtotal)}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-[#222222]/60">Phí vận chuyển</span>
+                <span className="font-semibold text-[#222222]">
+                  {shipping === 0 ? "Miễn phí" : formatVnd(shipping)}
+                </span>
+              </div>
+              {subtotal > 0 && subtotal < 250000 ? (
+                <p className="text-xs text-[#b5502f]">Đơn hàng dưới 250.000đ đang được cộng 30.000đ phí giao hàng.</p>
+              ) : null}
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-[#222222]/60">Voucher {VOUCHER_CODE}</span>
+                <span className="font-semibold text-[#b5502f]">-{formatVnd(discount)}</span>
+              </div>
+              <div className="flex items-center justify-between border-t border-black/8 pt-3">
+                <span className="text-sm font-semibold text-[#222222]">Tổng thanh toán</span>
+                <span className="text-xl font-bold text-[#1E5B38]">{formatVnd(grandTotal)}</span>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-4">
+              <GiftSummary mateGiftCount={mateGiftCount} />
+
+              <div className="rounded-[24px] border border-[#1E5B38]/10 bg-[#f7fbf8] p-4">
+                <p className="text-sm font-semibold text-[#1E5B38]">Liên hệ nhanh để xác nhận đơn</p>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <a
+                    href={`tel:${CONTACT_PHONE}`}
+                    className="rounded-full bg-[#1E5B38] px-4 py-2.5 text-sm font-semibold text-white"
+                  >
+                    Gọi {CONTACT_PHONE}
+                  </a>
+                  <a
+                    href={ZALO_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-full border border-[#1E5B38]/15 bg-white px-4 py-2.5 text-sm font-semibold text-[#1E5B38]"
+                  >
+                    Zalo {CONTACT_PHONE}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function CartDrawer() {
+  const { lines, isOpen, closeCart, setQuantity, removeLine, subtotal, openCheckout } = useCart();
+
+  return (
+    <>
+      <div
+        aria-hidden={!isOpen}
+        className={`fixed inset-0 z-[70] transition-opacity duration-300 ${
+          isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <button
+          type="button"
+          aria-label="Đóng giỏ hàng"
+          onClick={closeCart}
+          className="absolute inset-0 bg-black/35 backdrop-blur-[2px]"
+        />
+        <aside
+          className={`absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-[#FAF9F5] shadow-2xl transition-transform duration-500 ease-out ${
+            isOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <div className="flex items-center justify-between border-b border-black/8 px-6 py-5">
+            <h2 className="text-lg font-semibold text-[#222222]">Giỏ hàng của bạn</h2>
+            <button
+              type="button"
+              aria-label="Đóng"
+              onClick={closeCart}
+              className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-black/5"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#222222" strokeWidth="2">
+                <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-6 py-4">
+            {lines.length === 0 ? (
+              <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+                <p className="text-sm text-[#222222]/50">Giỏ hàng của bạn đang trống.</p>
+              </div>
+            ) : (
+              <ul className="space-y-4">
+                {lines.map((line) => (
+                  <li key={line.product.id} className="flex gap-3">
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[#F1EFE7]">
+                      <img src={line.product.image} alt={line.product.name} className="h-full w-full object-cover" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="line-clamp-1 text-sm font-medium text-[#222222]">{line.product.name}</p>
+                      <p className={`mt-1 text-sm font-semibold ${line.product.oldPrice ? "text-[#d12f2f]" : "text-[#1E5B38]"}`}>
+                        {formatVnd(line.product.price)}
+                      </p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <div className="flex items-center rounded-full border border-black/10">
+                          <button
+                            type="button"
+                            onClick={() => setQuantity(line.product.id, line.quantity - 1)}
+                            className="flex h-7 w-7 items-center justify-center text-sm text-[#222222]/60"
+                          >
+                            −
+                          </button>
+                          <span className="w-5 text-center text-xs font-medium">{line.quantity}</span>
+                          <button
+                            type="button"
+                            onClick={() => setQuantity(line.product.id, line.quantity + 1)}
+                            className="flex h-7 w-7 items-center justify-center text-sm text-[#222222]/60"
+                          >
+                            +
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeLine(line.product.id)}
+                          className="text-xs text-[#222222]/40 underline hover:text-[#222222]/70"
+                        >
+                          Xóa
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="sticky bottom-0 border-t border-black/8 bg-[#FAF9F5] px-6 py-5">
+            <div className="mb-3 rounded-[24px] border border-[#D6B36A]/25 bg-white px-4 py-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#b5502f]">Voucher landing page</p>
+              <div className="mt-2 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xl font-bold tracking-tight text-[#1E5B38]">{VOUCHER_CODE}</p>
+                  <p className="text-xs text-[#222222]/55">Khách cần bấm lấy mã trước khi áp dụng trong checkout</p>
+                </div>
+                <div className="rounded-full bg-[#fff2e8] px-3 py-1.5 text-sm font-bold text-[#b5502f]">
+                  -5K
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-2 flex items-center justify-between text-sm">
+              <span className="text-[#222222]/60">Tạm tính</span>
+              <span className="text-lg font-bold text-[#1E5B38]">{formatVnd(subtotal)}</span>
+            </div>
+            <p className="mb-4 text-xs text-[#222222]/55">
+              Miễn phí vận chuyển cho đơn từ 250.000đ. Thanh toán sẽ mở form checkout chi tiết.
+            </p>
+            <p className="-mt-2 mb-4 text-xs font-medium text-[#b5502f]">Đơn dưới 250.000đ sẽ cộng thêm 30.000đ phí ship.</p>
+            <button
+              type="button"
+              onClick={openCheckout}
+              disabled={lines.length === 0}
+              className="w-full rounded-full bg-[#1E5B38] py-3.5 text-sm font-semibold text-white transition hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Thanh toán ngay
+            </button>
+          </div>
+        </aside>
+      </div>
+
+      <CheckoutModal />
+    </>
+  );
+}
+
+export function SupportBubble() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="fixed bottom-24 right-5 z-40 md:bottom-8">
+      {open ? (
+        <div className="mb-3 w-72 rounded-[24px] bg-white p-4 text-sm shadow-xl">
+          <p className="font-semibold text-[#222222]">Liên hệ SADU thật nhanh</p>
+          <p className="mt-1 text-xs leading-relaxed text-[#222222]/60">
+            Gọi trực tiếp hoặc nhắn Zalo để được tư vấn miễn phí và xác nhận đơn nhanh hơn.
+          </p>
+          <div className="mt-4 grid gap-2">
+            <a
+              href={`tel:${CONTACT_PHONE}`}
+              className="flex items-center justify-between rounded-2xl bg-[#1E5B38] px-4 py-3 text-sm font-semibold text-white"
+            >
+              <span>Gọi {CONTACT_PHONE}</span>
+              <span>→</span>
+            </a>
+            <a
+              href={ZALO_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-3 rounded-2xl border border-[#1E5B38]/10 bg-[#f8fbff] px-4 py-3 text-sm font-semibold text-[#1266f1]"
+            >
+              <img src="/assets/icons/zalo.webp" alt="Zalo" className="h-6 w-6 rounded-full object-cover" />
+              Nhắn Zalo {CONTACT_PHONE}
+            </a>
+          </div>
+        </div>
+      ) : null}
+      <button
+        type="button"
+        aria-label="Hỗ trợ"
+        onClick={() => setOpen((v) => !v)}
+        className="flex h-13 w-13 animate-[pulse_3s_ease-in-out_infinite] items-center justify-center rounded-full bg-white shadow-[0_10px_25px_-8px_rgba(0,0,0,0.35)] transition active:scale-90"
+      >
+        <img src="/assets/icons/zalo.webp" alt="Zalo" className="h-9 w-9 rounded-full object-cover" />
+      </button>
+    </div>
+  );
+}
+
+export function MobilePurchaseBar() {
+  const { count, subtotal, openCart } = useCart();
+
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-black/8 bg-[#FAF9F5]/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-lg md:hidden">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-[11px] text-[#222222]/50">{count} sản phẩm</p>
+          <p className="text-base font-bold text-[#1E5B38]">{formatVnd(subtotal)}</p>
+        </div>
+        <button
+          type="button"
+          onClick={openCart}
+          className="flex-1 max-w-[220px] rounded-full bg-[#1E5B38] py-3.5 text-sm font-semibold text-white transition active:scale-[0.97]"
+        >
+          Thanh toán
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function CouponWidget() {
+  const [visible, setVisible] = useState(false);
+  const [claimed, setClaimed] = useState(false);
+
+  useEffect(() => {
+    const syncVoucher = () => {
+      const dismissed = window.localStorage.getItem("sadu-coupon-dismissed");
+      const hasClaimed = window.localStorage.getItem(VOUCHER_STORAGE_KEY) === "1";
+      if (!dismissed) {
+        setVisible(true);
+      }
+      setClaimed(hasClaimed);
+    };
+
+    syncVoucher();
+    window.addEventListener(VOUCHER_UNLOCK_EVENT, syncVoucher);
+    window.addEventListener("storage", syncVoucher);
+
+    return () => {
+      window.removeEventListener(VOUCHER_UNLOCK_EVENT, syncVoucher);
+      window.removeEventListener("storage", syncVoucher);
+    };
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <div className="fixed bottom-24 left-5 z-40 w-[250px] overflow-hidden rounded-[28px] border border-[#D6B36A]/35 bg-white shadow-[0_20px_50px_-24px_rgba(0,0,0,0.35)] md:bottom-8">
+      <div className="bg-[radial-gradient(circle_at_top_left,_rgba(214,179,106,0.35),_transparent_48%),linear-gradient(135deg,#1E5B38,#2b7a4a)] px-5 pb-5 pt-4 text-white">
+        <button
+          type="button"
+          aria-label="Đóng voucher"
+          onClick={() => {
+            window.localStorage.setItem("sadu-coupon-dismissed", "1");
+            setVisible(false);
+          }}
+          className="absolute right-3 top-3 text-xs text-white/70"
+        >
+          ✕
+        </button>
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#D6B36A]">Voucher ưu đãi</p>
+        <p className="mt-2 text-3xl font-bold tracking-tight">{formatVnd(VOUCHER_DISCOUNT)}</p>
+        <p className="mt-2 text-sm text-white/80">Khách cần lấy mã trước, sau đó mới áp dụng được trong form thanh toán.</p>
+      </div>
+
+      <div className="space-y-3 px-5 py-4">
+        <div className="rounded-[20px] border border-dashed border-[#D6B36A]/50 bg-[#fffbf2] px-4 py-3 text-center">
+          <p className="text-[11px] uppercase tracking-[0.16em] text-[#1E5B38]/55">Mã voucher</p>
+          <p className="mt-1 text-xl font-extrabold tracking-[0.18em] text-[#1E5B38]">{VOUCHER_CODE}</p>
+        </div>
+        <button
+          type="button"
+          onClick={async () => {
+            await navigator.clipboard.writeText(VOUCHER_CODE);
+            window.localStorage.setItem(VOUCHER_STORAGE_KEY, "1");
+            window.dispatchEvent(new Event(VOUCHER_UNLOCK_EVENT));
+            setClaimed(true);
+          }}
+          className="w-full rounded-full bg-[#1E5B38] py-3 text-sm font-semibold text-white"
+        >
+          {claimed ? "Đã lấy mã SONGLANH" : "Lấy mã voucher"}
+        </button>
+      </div>
+    </div>
+  );
+}
