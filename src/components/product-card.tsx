@@ -1,6 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCart } from "../lib/cart-context";
-import { formatVnd, type Product } from "../lib/products";
+import {
+  formatVnd,
+  getProductSchema,
+  type Product,
+} from "../lib/products";
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -22,6 +26,21 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
+function badgeStyles(badge?: Product["badge"]) {
+  switch (badge) {
+    case "SALE":
+      return "bg-[#D6B36A] text-[#222222]";
+    case "NEW":
+      return "bg-[#EEF6F0] text-[#1E5B38]";
+    case "BEST SELLER":
+      return "bg-[#1E5B38] text-white";
+    case "COMBO":
+      return "bg-[#222222] text-white";
+    default:
+      return "bg-white/90 text-[#222222]";
+  }
+}
+
 type FlyState = {
   src: string;
   startX: number;
@@ -41,7 +60,10 @@ export function ProductCard({
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
   const [flyState, setFlyState] = useState<FlyState | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const isFavorite = favorites.has(product.id);
+
+  const schemaJson = useMemo(() => JSON.stringify(getProductSchema(product)), [product]);
 
   useEffect(() => {
     if (!flyState) return;
@@ -63,7 +85,6 @@ export function ProductCard({
   }, [flyState, notifyCartFx, product.id]);
 
   const handleAdd = (event?: React.MouseEvent<HTMLButtonElement>) => {
-    const willOpenCart = document.querySelectorAll('[aria-label^="Giỏ hàng"]').length > 0 ? false : false;
     addToCart(product.id, quantity);
     setJustAdded(true);
     window.setTimeout(() => setJustAdded(false), 1600);
@@ -91,27 +112,29 @@ export function ProductCard({
     checkoutNow(product.id, quantity);
   };
 
-  const discount = product.oldPrice ? Math.round((1 - product.price / product.oldPrice) * 100) : null;
-
   return (
     <>
-      <div className="group flex h-full flex-col overflow-hidden rounded-[22px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-shadow duration-300 hover:shadow-[0_20px_45px_-25px_rgba(30,91,56,0.35)]">
+      <article
+        id={product.slug}
+        className="group relative flex h-full flex-col overflow-hidden rounded-[22px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_-28px_rgba(30,91,56,0.32)]"
+      >
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schemaJson }} />
+
         <div className="relative aspect-square overflow-hidden bg-[#F1EFE7]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.68),transparent_48%),linear-gradient(180deg,rgba(255,255,255,0.32),rgba(214,179,106,0.08))]" />
           <img
             src={product.image}
+            srcSet={`${product.image} 640w, ${product.image} 960w`}
+            sizes={compactMobile ? "(max-width: 640px) 50vw, 25vw" : "(max-width: 1024px) 50vw, 33vw"}
             alt={product.name}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08]"
+            decoding="async"
+            onLoad={() => setImageLoaded(true)}
+            className={`h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.06] ${imageLoaded ? "scale-100 blur-0" : "scale-[1.02] blur-sm"}`}
           />
 
           {product.badge ? (
-            <span
-              className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                product.badge === "Giảm giá" || product.badge === "Flash Sale"
-                  ? "bg-[#D6B36A] text-[#222222]"
-                  : "bg-[#1E5B38] text-white"
-              }`}
-            >
+            <span className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-[11px] font-semibold ${badgeStyles(product.badge)}`}>
               {product.badge}
             </span>
           ) : null}
@@ -137,66 +160,58 @@ export function ProductCard({
               />
             </svg>
           </button>
-
-          <button
-            type="button"
-            onClick={handleAdd}
-            aria-label="Thêm nhanh vào giỏ"
-            className={`absolute bottom-3 right-3 flex h-10 w-10 items-center justify-center rounded-full shadow-md transition-all duration-300 active:scale-90 ${
-              justAdded ? "bg-[#1E5B38]" : "bg-white text-[#1E5B38] hover:bg-[#1E5B38] hover:text-white"
-            }`}
-          >
-            {justAdded ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5">
-                <path d="M5 12.5l4.5 4.5L19 7" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-              </svg>
-            )}
-          </button>
         </div>
 
         <div className={`flex flex-1 flex-col ${compactMobile ? "gap-1.5 p-3 sm:gap-2 sm:p-4" : "gap-2 p-4"}`}>
           <div className="flex items-center justify-between gap-2">
             <span className="rounded-full bg-[#1E5B38]/8 px-2.5 py-1 text-[11px] font-semibold text-[#1E5B38]">
-              {product.size}
+              {product.brand}
             </span>
-            {discount ? (
-              <span className="rounded-full bg-[#b5502f]/10 px-2.5 py-1 text-[11px] font-bold text-[#b5502f]">
-                -{discount}%
+            <div className="flex items-center gap-1.5">
+              {product.discount ? (
+                <span className="rounded-full bg-[#b5502f]/10 px-2.5 py-1 text-[11px] font-bold text-[#b5502f]">
+                  -{product.discount}%
+                </span>
+              ) : null}
+              <span className="rounded-full bg-[#F4F2EB] px-2.5 py-1 text-[11px] font-medium text-[#222222]/65">
+                Còn hàng
               </span>
-            ) : null}
+            </div>
           </div>
 
           <h3
-            className={`line-clamp-2 font-semibold text-[#222222] ${
-              compactMobile ? "min-h-[2.5rem] text-[13px] leading-5 sm:min-h-[2.6rem] sm:text-sm" : "min-h-[2.6rem] text-sm"
-            }`}
+            className={`line-clamp-2 font-semibold text-[#222222] ${compactMobile ? "min-h-[2.5rem] text-[13px] leading-5 sm:min-h-[2.6rem] sm:text-sm" : "min-h-[2.6rem] text-sm"}`}
           >
             {product.name}
           </h3>
 
-          <p className={`text-xs leading-relaxed text-[#222222]/55 ${compactMobile ? "hidden sm:block" : ""}`}>
-            {product.short}
+          <p className={`line-clamp-2 text-xs leading-relaxed text-[#222222]/55 ${compactMobile ? "" : ""}`}>
+            {product.shortDescription}
           </p>
 
-          <div className={`flex items-center gap-1.5 ${compactMobile ? "hidden sm:flex" : ""}`}>
+          <div className="flex items-center gap-1.5">
             <Stars rating={product.rating} />
+            <span className="text-xs font-medium text-[#222222]/80">{product.rating.toFixed(1)}</span>
             <span className="text-xs text-[#222222]/50">({product.reviewCount})</span>
           </div>
 
-          <div className="mt-auto flex items-baseline gap-2 pt-1">
-            <span className={`${compactMobile ? "text-sm sm:text-base" : "text-base"} font-bold ${product.oldPrice ? "text-[#d12f2f]" : "text-[#1E5B38]"}`}>
-              {formatVnd(product.price)}
+          <div className="flex items-end justify-between gap-3 pt-1">
+            <div className="flex min-w-0 flex-col">
+              {product.oldPrice ? (
+                <span className="text-xs text-[#222222]/40 line-through">{formatVnd(product.oldPrice)}</span>
+              ) : (
+                <span className="text-xs text-transparent">.</span>
+              )}
+              <span className={`${compactMobile ? "text-sm sm:text-base" : "text-base"} font-bold text-[#d12f2f]`}>
+                {formatVnd(product.price)}
+              </span>
+            </div>
+            <span className="rounded-full border border-black/8 px-2.5 py-1 text-[11px] font-medium text-[#222222]/65">
+              {product.size}
             </span>
-            {product.oldPrice ? (
-              <span className="text-xs text-[#222222]/40 line-through">{formatVnd(product.oldPrice)}</span>
-            ) : null}
           </div>
 
-          <div className="mt-2 flex items-center gap-2">
+          <div className="mt-auto flex items-center gap-2 pt-2">
             <div className={`items-center rounded-full border border-black/10 ${compactMobile ? "hidden sm:flex" : "flex"}`}>
               <button
                 type="button"
@@ -220,25 +235,22 @@ export function ProductCard({
             <button
               type="button"
               onClick={handleAdd}
-              className={`rounded-full border border-[#1E5B38]/15 bg-[#F7F5EE] text-xs font-semibold text-[#1E5B38] transition hover:bg-[#EDE8D8] active:scale-[0.98] ${
-                compactMobile ? "w-full py-2.5" : "flex-1 py-2"
-              }`}
+              className={`relative overflow-hidden rounded-full border border-[#1E5B38]/15 bg-[#F7F5EE] text-xs font-semibold text-[#1E5B38] transition hover:bg-[#EDE8D8] active:scale-[0.98] ${compactMobile ? "w-full py-2.5" : "flex-1 py-2"}`}
             >
-              Thêm vào giỏ
+              <span className="pointer-events-none absolute inset-0 scale-0 rounded-full bg-[#1E5B38]/8 transition-transform duration-500 group-active:scale-150" />
+              <span className="relative z-10">Thêm vào giỏ</span>
             </button>
           </div>
 
           <button
             type="button"
             onClick={handleBuyNow}
-            className={`mt-1 w-full rounded-full bg-[#222222] py-2.5 text-xs font-semibold text-white transition hover:bg-[#1E5B38] active:scale-[0.98] ${
-              compactMobile ? "hidden sm:block" : ""
-            }`}
+            className={`mt-1 w-full rounded-full bg-[#222222] py-2.5 text-xs font-semibold text-white transition hover:bg-[#1E5B38] active:scale-[0.98] ${compactMobile ? "hidden sm:block" : ""}`}
           >
             Mua ngay
           </button>
         </div>
-      </div>
+      </article>
 
       {flyState ? (
         <img
@@ -258,3 +270,4 @@ export function ProductCard({
     </>
   );
 }
+
