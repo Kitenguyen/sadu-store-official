@@ -1,5 +1,5 @@
 export const SITE_ORIGIN = "https://www.sadu.com.vn";
-export const SITE_BASE_PATH = "/mate-store";
+export const SITE_BASE_PATH = "/sadu-store-official";
 export const SITE_URL = `${SITE_ORIGIN}${SITE_BASE_PATH}`;
 
 export function withBasePath(path = "/") {

@@ -5,6 +5,8 @@
   "theme_color": "#1E5B38",
   "background_color": "#FAF9F5",
   "display": "standalone",
+  "start_url": "/sadu-store-official/",
+  "scope": "/sadu-store-official/",
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },

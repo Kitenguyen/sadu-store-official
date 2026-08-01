@@ -7,7 +7,7 @@ export const Route = createFileRoute('/robots.txt')({
       GET: async ({ request }) => {
         const body = [
           'User-agent: *',
-          'Allow: /mate-store',
+          'Allow: /sadu-store-official',
           '',
           `Sitemap: ${SITE_URL}/sitemap.xml`,
         ].join('\n')

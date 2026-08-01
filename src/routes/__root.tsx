@@ -11,7 +11,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "SADU" },
-      { name: "description", content: "Landing page trà SADU Mate tại www.sadu.com.vn/mate-store" },
+      {
+        name: "description",
+        content: "Landing page SADU Store Official tai www.sadu.com.vn/sadu-store-official",
+      },
       { property: "og:url", content: SITE_URL },
     ],
     links: [
