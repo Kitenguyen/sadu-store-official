@@ -18,10 +18,12 @@ function GiftSummary({ mateGiftCount }: { mateGiftCount: number }) {
 
   return (
     <div className="rounded-2xl border border-[#D6B36A]/30 bg-[#fff8eb] p-3 text-sm text-[#6d4c1d]">
-      <p className="font-semibold">Ưu đãi Trà Mate đã kích hoạt</p>
+      <p className="font-semibold">Khuyến mãi Trà Mate trong đơn hàng</p>
       <p className="mt-1 text-xs leading-relaxed text-[#6d4c1d]/80">
-        Bạn được tặng <span className="font-bold">{mateGiftCount} hộp Trà Mate bất kỳ</span> vì đã mua đủ{" "}
-        {mateGiftCount >= 2 ? "5" : "3"} sản phẩm Trà Mate trở lên.
+        {mateGiftCount >= 2
+          ? "Mua 5 hộp Trà Mate, tặng 2 hộp. Đơn này của khách đã được tặng "
+          : "Mua 3 hộp Trà Mate, tặng 1 hộp. Đơn này của khách đã được tặng "}
+        <span className="font-bold">{mateGiftCount} hộp Trà Mate bất kỳ</span>.
       </p>
     </div>
   );
@@ -184,15 +186,24 @@ function CheckoutModal() {
     }
   }, [isCheckoutOpen]);
 
+  const matePromotionSummary =
+    mateGiftCount >= 2
+      ? `Khuyến mãi Trà Mate: mua 5 tặng 2, khách được tặng ${mateGiftCount} hộp`
+      : mateGiftCount === 1
+        ? `Khuyến mãi Trà Mate: mua 3 tặng 1, khách được tặng ${mateGiftCount} hộp`
+        : "";
+
   async function submitOrder() {
     if (lines.length === 0) return;
+
+    const noteWithPromotion = [customer.note.trim(), matePromotionSummary].filter(Boolean).join(" | ");
 
     const payload = {
       customer: {
         name: customer.name.trim(),
         phone: customer.phone.trim(),
         address: customer.address.trim(),
-        note: customer.note.trim(),
+        note: noteWithPromotion,
         payment: customer.payment,
       },
       items: lines.map((line) => ({
@@ -216,6 +227,7 @@ function CheckoutModal() {
       couponClaimed,
       mateCount,
       mateGiftCount,
+      matePromotionSummary,
       sourcePage: window.location.href,
       userAgent: navigator.userAgent,
     };
