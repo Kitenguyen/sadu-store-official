@@ -122,10 +122,10 @@ const HOMEPAGE_SCHEMA = JSON.stringify([
 const SCENES: ScrollScrubScene[] = [
   {
     id: "source",
-    label: "Khởi đầu lành",
-    kicker: "SADU · Trà thảo dược Việt Nam",
-    title: "Trà thảo dược SADU cho thói quen uống lành mỗi ngày",
-    body: "Từ vùng nguyên liệu sạch, SADU mang đến Trà Mate, trà thảo dược và combo ưu đãi giao hàng toàn quốc để khách chọn nhanh, uống tiện và mua dễ hơn.",
+    label: "Nguồn cội",
+    kicker: "SADU · Từ núi rừng đến tách trà",
+    title: "Nguồn cội nguyên sơ",
+    body: "Thảo dược mọc tự nhiên trên những sườn đồi cao nguyên, đón nắng sớm và sương mù mỗi ban mai.",
     poster: assetUrl("/assets/world/scene-01-poster.jpg"),
     mobilePoster: assetUrl("/assets/world/scene-01-mobile-poster.jpg"),
     clip: assetUrl("/assets/world/scene-01.mp4"),
@@ -184,7 +184,7 @@ function HeroActions() {
         href="#categories"
         className="group relative overflow-hidden rounded-full bg-[#D6B36A] px-7 py-3.5 text-sm font-semibold text-[#1E5B38] transition active:scale-[0.97]"
       >
-        <span className="relative z-10">Xem sản phẩm và ưu đãi</span>
+        <span className="relative z-10">Khám phá bộ sưu tập</span>
         <span className="absolute inset-0 -translate-x-full bg-white/30 transition-transform duration-500 group-hover:translate-x-0" />
       </a>
       <a
