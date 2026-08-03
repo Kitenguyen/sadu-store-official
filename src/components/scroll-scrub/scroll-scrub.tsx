@@ -208,6 +208,7 @@ export function ScrollScrub({
     let destroyed = false;
     let dirty = true;
     let frame = 0;
+    let frameScheduled = false;
     let rootTop = 0;
     let started = false;
     let total = 1;
@@ -295,7 +296,7 @@ export function ScrollScrub({
         video.className = "scroll-scrub__video";
         video.muted = true;
         video.playsInline = true;
-        video.preload = "auto";
+        video.preload = isMobile() ? "metadata" : "auto";
         video.setAttribute("muted", "");
         video.setAttribute("playsinline", "");
         video.src = source;
@@ -309,6 +310,7 @@ export function ScrollScrub({
             segment.ready = true;
             segment.loading = false;
             dirty = true;
+            queueFrame();
           },
           { once: true },
         );
@@ -389,11 +391,27 @@ export function ScrollScrub({
         segment.visible = opacity > 0.001;
         segment.layer.style.opacity = String(opacity);
         segment.layer.style.zIndex = index === currentIndex ? "2" : "1";
+      }
 
-        if (y > segment.start - 1.5 * viewportHeight && y < segment.end + 1.5 * viewportHeight) {
-          ensurePosterLoaded(segment);
-          void loadClip(segment);
+      for (const [index, segment] of runtime.entries()) {
+        const preloadWindow = isMobile() ? 0.45 : 1.5;
+        const withinWindow =
+          y > segment.start - preloadWindow * viewportHeight &&
+          y < segment.end + preloadWindow * viewportHeight;
+        if (!withinWindow) {
+          continue;
         }
+
+        ensurePosterLoaded(segment);
+
+        if (isMobile()) {
+          const nearActiveScene = Math.abs(index - currentIndex) <= 1;
+          if (!userReady || !nearActiveScene) {
+            continue;
+          }
+        }
+
+        void loadClip(segment);
       }
 
       const current = runtime[currentIndex];
@@ -415,15 +433,24 @@ export function ScrollScrub({
     };
 
     const updateVideos = () => {
+      let needsFrame = false;
+
       for (const segment of runtime) {
         const { video } = segment;
         if (!video || !segment.ready || video.seeking) {
+          if (video?.seeking) {
+            needsFrame = true;
+          }
           continue;
         }
         if (!segment.visible && Math.abs(segment.current - segment.target) < 0.002) {
           continue;
         }
 
+        const delta = segment.target - segment.current;
+        if (Math.abs(delta) >= 0.002 || segment.visible) {
+          needsFrame = true;
+        }
         segment.current += (segment.target - segment.current) * 0.2;
         const targetTime = clamp(segment.current, 0, 0.999) * (video.duration || 1);
         const epsilon = isMobile() ? 0.02 : 0.008;
@@ -435,18 +462,30 @@ export function ScrollScrub({
           }
         }
       }
+
+      return needsFrame;
+    };
+
+    const queueFrame = () => {
+      if (destroyed || frameScheduled) {
+        return;
+      }
+      frameScheduled = true;
+      frame = window.requestAnimationFrame(tick);
     };
 
     const tick = () => {
       if (destroyed) {
         return;
       }
+      frameScheduled = false;
       if (dirty) {
         dirty = false;
         readScroll();
       }
-      updateVideos();
-      frame = window.requestAnimationFrame(tick);
+      if (dirty || updateVideos()) {
+        queueFrame();
+      }
     };
 
     const startRuntime = () => {
@@ -456,7 +495,7 @@ export function ScrollScrub({
       started = true;
       layout();
       dirty = true;
-      frame = window.requestAnimationFrame(tick);
+      queueFrame();
     };
 
     const onScroll = () => {
@@ -467,6 +506,7 @@ export function ScrollScrub({
         startRuntime();
       }
       dirty = true;
+      queueFrame();
     };
     const onResize = () => {
       if (!started) {
@@ -476,6 +516,7 @@ export function ScrollScrub({
         return;
       }
       layout();
+      queueFrame();
     };
     const onFirstGesture = () => {
       if (userReady) {
@@ -485,9 +526,15 @@ export function ScrollScrub({
       if (!started) {
         startRuntime();
       }
+      dirty = true;
+      queueFrame();
       for (const segment of runtime) {
         void primeVideo(segment.video);
       }
+    };
+    const onOrientationChange = () => {
+      layout();
+      queueFrame();
     };
 
     controllerRef.current = {
@@ -511,7 +558,7 @@ export function ScrollScrub({
 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize);
-    window.addEventListener("orientationchange", layout);
+    window.addEventListener("orientationchange", onOrientationChange);
     window.addEventListener("pointerdown", onFirstGesture, {
       once: true,
       passive: true,
@@ -522,7 +569,9 @@ export function ScrollScrub({
     });
 
     ensurePosterLoaded(runtime[0]);
-    startRuntime();
+    layout();
+    dirty = true;
+    queueFrame();
 
     return () => {
       destroyed = true;
@@ -530,7 +579,7 @@ export function ScrollScrub({
       window.cancelAnimationFrame(frame);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
-      window.removeEventListener("orientationchange", layout);
+      window.removeEventListener("orientationchange", onOrientationChange);
       window.removeEventListener("pointerdown", onFirstGesture);
       window.removeEventListener("touchstart", onFirstGesture);
       root.style.removeProperty("--ss-progress");
