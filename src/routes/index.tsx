@@ -142,11 +142,11 @@ function Index() {
         <div className="relative">
           <SongLanhJourney />
           <PromoBanner />
+          <Certifications />
           <ProductCategories />
           <FeaturedProducts />
           <WhyChooseUs />
           <FarmStory />
-          <Certifications />
           <Reviews />
           <Faq />
           <SiteFooter />
