@@ -2,10 +2,12 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
+import { trackAddToCart, trackSelectItem } from "./analytics";
 import { products, type Product } from "./products";
 
 export interface CartLine {
@@ -36,12 +38,75 @@ interface CartContextValue {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
+const CART_STORAGE_KEY = "sadu-store-cart";
+const FAVORITES_STORAGE_KEY = "sadu-store-favorites";
+
+function readStoredLines() {
+  if (typeof window === "undefined") return [] as CartLine[];
+
+  try {
+    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) return [] as CartLine[];
+
+    const parsed = JSON.parse(raw) as Array<{ productId: string; quantity: number }>;
+    return parsed
+      .map((item) => {
+        const product = products.find((candidate) => candidate.id === item.productId);
+        if (!product || item.quantity <= 0) return null;
+        return { product, quantity: item.quantity };
+      })
+      .filter((line): line is CartLine => Boolean(line));
+  } catch {
+    return [] as CartLine[];
+  }
+}
+
+function readStoredFavorites() {
+  if (typeof window === "undefined") return new Set<string>();
+
+  try {
+    const raw = window.localStorage.getItem(FAVORITES_STORAGE_KEY);
+    if (!raw) return new Set<string>();
+    const parsed = JSON.parse(raw) as string[];
+    return new Set(
+      parsed.filter((productId) => products.some((product) => product.id === productId)),
+    );
+  } catch {
+    return new Set<string>();
+  }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [cartFxTick, setCartFxTick] = useState(0);
+  const [storageReady, setStorageReady] = useState(false);
+
+  useEffect(() => {
+    setLines(readStoredLines());
+    setFavorites(readStoredFavorites());
+    setStorageReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!storageReady || typeof window === "undefined") return;
+    window.localStorage.setItem(
+      CART_STORAGE_KEY,
+      JSON.stringify(
+        lines.map((line) => ({
+          productId: line.product.id,
+          quantity: line.quantity,
+        })),
+      ),
+    );
+  }, [lines, storageReady]);
+
+  useEffect(() => {
+    if (!storageReady || typeof window === "undefined") return;
+    window.localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(Array.from(favorites)));
+  }, [favorites, storageReady]);
 
   const notifyCartFx = useCallback(() => {
     setCartFxTick((prev) => prev + 1);
@@ -53,14 +118,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     let shouldOpenCart = false;
 
+    trackSelectItem(product, quantity, "add_to_cart");
+    trackAddToCart(product, quantity, "product_list");
+
     setLines((prev) => {
       shouldOpenCart = prev.length === 0;
       const existing = prev.find((line) => line.product.id === productId);
       if (existing) {
         return prev.map((line) =>
-          line.product.id === productId
-            ? { ...line, quantity: line.quantity + quantity }
-            : line,
+          line.product.id === productId ? { ...line, quantity: line.quantity + quantity } : line,
         );
       }
       return [...prev, { product, quantity }];
@@ -76,13 +142,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const checkoutNow = useCallback((productId: string, quantity = 1) => {
     const product = products.find((p) => p.id === productId);
     if (!product) return;
+    trackSelectItem(product, quantity, "buy_now");
     setLines((prev) => {
       const existing = prev.find((line) => line.product.id === productId);
       if (existing) {
         return prev.map((line) =>
-          line.product.id === productId
-            ? { ...line, quantity: line.quantity + quantity }
-            : line,
+          line.product.id === productId ? { ...line, quantity: line.quantity + quantity } : line,
         );
       }
       return [...prev, { product, quantity }];
@@ -99,9 +164,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setLines((prev) =>
       quantity <= 0
         ? prev.filter((line) => line.product.id !== productId)
-        : prev.map((line) =>
-            line.product.id === productId ? { ...line, quantity } : line,
-          ),
+        : prev.map((line) => (line.product.id === productId ? { ...line, quantity } : line)),
     );
   }, []);
 
@@ -117,10 +180,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const count = useMemo(
-    () => lines.reduce((sum, line) => sum + line.quantity, 0),
-    [lines],
-  );
+  const count = useMemo(() => lines.reduce((sum, line) => sum + line.quantity, 0), [lines]);
   const subtotal = useMemo(
     () => lines.reduce((sum, line) => sum + line.quantity * line.product.price, 0),
     [lines],

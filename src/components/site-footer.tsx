@@ -1,4 +1,5 @@
 import { assetUrl } from "../lib/site";
+import { trackContactClick } from "../lib/analytics";
 
 const CONTACT_PHONE = "0355532863";
 
@@ -18,22 +19,31 @@ export function SiteFooter() {
             <div>
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white/12">
-                  <img src={assetUrl("/assets/brand/mark.png")} alt="" aria-hidden="true" className="h-full w-full object-cover" />
+                  <img
+                    src={assetUrl("/assets/brand/mark.png")}
+                    alt=""
+                    aria-hidden="true"
+                    className="h-full w-full object-cover"
+                  />
                 </span>
                 <div>
                   <p className="text-lg font-extrabold tracking-tight">SADU</p>
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/45">Thảo dược Việt Nam</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-white/45">
+                    Thảo dược Việt Nam
+                  </p>
                 </div>
               </div>
 
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/68">
-                Ngày 18/5/2016 SADU ra đời với sứ mệnh đặc biệt, làm lan tỏa và biến vùng nguyên liệu sạch trở thành
-                từng sản phẩm thảo dược giá trị tới tay người tiêu dùng.
+                Ngày 18/5/2016 SADU ra đời với sứ mệnh đặc biệt, làm lan tỏa và biến vùng nguyên
+                liệu sạch trở thành từng sản phẩm thảo dược giá trị tới tay người tiêu dùng.
               </p>
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/45">Khám phá nhanh</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/45">
+                Khám phá nhanh
+              </p>
               <ul className="mt-4 grid gap-2.5 text-sm text-white/78">
                 {QUICK_LINKS.map((link) => (
                   <li key={link.href}>
@@ -46,7 +56,9 @@ export function SiteFooter() {
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/45">Liên hệ</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/45">
+                Liên hệ
+              </p>
               <div className="mt-4 space-y-3 text-sm text-white/78">
                 <p>Hotline / Zalo: {CONTACT_PHONE}</p>
                 <p>Công ty Cổ phần Nông nghiệp Công nghệ cao Thăng Long</p>
@@ -56,6 +68,7 @@ export function SiteFooter() {
               <div className="mt-5 flex flex-wrap gap-3">
                 <a
                   href={`tel:${CONTACT_PHONE}`}
+                  onClick={() => trackContactClick("phone", "site_footer")}
                   className="rounded-full bg-[#FAF9F5] px-4 py-2.5 text-sm font-semibold text-[#1E5B38] transition hover:bg-white"
                 >
                   Gọi ngay
@@ -64,6 +77,7 @@ export function SiteFooter() {
                   href={`https://zalo.me/${CONTACT_PHONE}`}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() => trackContactClick("zalo", "site_footer")}
                   className="rounded-full border border-white/18 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-white/40"
                 >
                   Zalo tư vấn

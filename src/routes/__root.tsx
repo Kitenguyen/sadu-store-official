@@ -5,9 +5,9 @@ import { SITE_ORIGIN, SITE_URL, withBasePath } from "../lib/site";
 import { Toaster } from "../components/ui/sonner";
 import "../styles.css";
 
-const SITE_TITLE = "SADU Store Official | Tra thao duoc Viet Nam";
+const SITE_TITLE = "SADU Store Official | Trà thảo dược Việt Nam";
 const SITE_DESCRIPTION =
-  "SADU Store Official cung cap tra thao duoc Viet Nam, bo suu tap Tra Mate, san pham khuyen mai va combo uu dai giao hang toan quoc.";
+  "SADU Store Official cung cấp trà thảo dược Việt Nam, bộ sưu tập Trà Mate, sản phẩm khuyến mại và combo ưu đãi giao hàng toàn quốc.";
 const SOCIAL_IMAGE_URL = new URL(withBasePath("/presets/cover.png"), SITE_ORIGIN).toString();
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({

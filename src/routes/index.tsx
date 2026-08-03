@@ -1,10 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 import { Certifications } from "../components/certifications";
 import { FAQS, Faq } from "../components/faq";
 import { FarmStory } from "../components/farm-story";
 import { FeaturedProducts } from "../components/featured-products";
-import { CartDrawer, CouponWidget, MobilePurchaseBar, SupportBubble } from "../components/floating-widgets";
+import {
+  CartDrawer,
+  CouponWidget,
+  MobilePurchaseBar,
+  SupportBubble,
+} from "../components/floating-widgets";
 import { ProductCategories } from "../components/product-categories";
 import { PromoBanner } from "../components/promo-banner";
 import { Reviews } from "../components/reviews";
@@ -14,6 +20,7 @@ import { SiteNav } from "../components/site-nav";
 import { SongLanhJourney } from "../components/song-lanh-journey";
 import { StructuredData } from "../components/StructuredData";
 import { WhyChooseUs } from "../components/why-choose-us";
+import { trackViewContent } from "../lib/analytics";
 import { CartProvider } from "../lib/cart-context";
 import { products } from "../lib/products";
 import { assetUrl, SITE_ORIGIN, SITE_URL } from "../lib/site";
@@ -46,7 +53,7 @@ const THEME = {
 };
 
 const PAGE_DESCRIPTION =
-  "SADU Store Official mang den bo suu tap Tra Mate, san pham thao duoc khuyen mai va combo uu dai giao hang toan quoc.";
+  "SADU Store Official mang đến bộ sưu tập Trà Mate, trà thảo dược và combo ưu đãi giao hàng toàn quốc.";
 const PRIMARY_IMAGE_URL = new URL(assetUrl("/presets/cover.png"), SITE_ORIGIN).toString();
 const HOMEPAGE_SCHEMA = JSON.stringify([
   {
@@ -115,10 +122,10 @@ const HOMEPAGE_SCHEMA = JSON.stringify([
 const SCENES: ScrollScrubScene[] = [
   {
     id: "source",
-    label: "Nguồn cội",
-    kicker: "SADU · Từ núi rừng đến tách trà",
-    title: "Nguồn cội nguyên sơ",
-    body: "Thảo dược mọc tự nhiên trên những sườn đồi cao nguyên, đón nắng sớm và sương mù mỗi ban mai.",
+    label: "Khởi đầu lành",
+    kicker: "SADU · Trà thảo dược Việt Nam",
+    title: "Trà thảo dược SADU cho thói quen uống lành mỗi ngày",
+    body: "Từ vùng nguyên liệu sạch, SADU mang đến Trà Mate, trà thảo dược và combo ưu đãi giao hàng toàn quốc để khách chọn nhanh, uống tiện và mua dễ hơn.",
     poster: assetUrl("/assets/world/scene-01-poster.jpg"),
     mobilePoster: assetUrl("/assets/world/scene-01-mobile-poster.jpg"),
     clip: assetUrl("/assets/world/scene-01.mp4"),
@@ -177,10 +184,13 @@ function HeroActions() {
         href="#categories"
         className="group relative overflow-hidden rounded-full bg-[#D6B36A] px-7 py-3.5 text-sm font-semibold text-[#1E5B38] transition active:scale-[0.97]"
       >
-        <span className="relative z-10">Khám phá bộ sưu tập</span>
+        <span className="relative z-10">Xem sản phẩm và ưu đãi</span>
         <span className="absolute inset-0 -translate-x-full bg-white/30 transition-transform duration-500 group-hover:translate-x-0" />
       </a>
-      <a href="#farm-story" className="group inline-flex items-center gap-2 text-sm font-medium text-white">
+      <a
+        href="#farm-story"
+        className="group inline-flex items-center gap-2 text-sm font-medium text-white"
+      >
         <span className="border-b border-white/0 transition-colors group-hover:border-white/70">
           Xem câu chuyện nông trại
         </span>
@@ -215,6 +225,10 @@ function TrustBadgesBar() {
 }
 
 function Index() {
+  useEffect(() => {
+    trackViewContent();
+  }, []);
+
   return (
     <CartProvider>
       <div id="top" className="min-h-dvh bg-[#FAF9F5]">

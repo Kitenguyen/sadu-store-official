@@ -1,5 +1,12 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useCart } from "../lib/cart-context";
+import { useRef } from "react";
+import {
+  trackApplyVoucher,
+  trackContactClick,
+  trackInitiateCheckout,
+  trackViewCart,
+} from "../lib/analytics";
 import { formatVnd } from "../lib/products";
 import { assetUrl } from "../lib/site";
 
@@ -12,6 +19,20 @@ const APPS_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbxPJagkaTKGJ2w2uc7QKh9wh1JVCQ5pt6wm4hXZegpMHHkz2ZKTdTYoAROCYrG3BZ4/exec";
 const VOUCHER_STORAGE_KEY = "sadu-voucher-songlanh-claimed";
 const VOUCHER_UNLOCK_EVENT = "sadu:voucher-unlocked";
+
+function normalizeVoucherCode(value: string) {
+  return value.trim().toUpperCase();
+}
+
+function unlockVoucher() {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(VOUCHER_STORAGE_KEY, "1");
+  window.dispatchEvent(new Event(VOUCHER_UNLOCK_EVENT));
+}
+
+function scrollToSection(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
 function GiftSummary({ mateGiftCount }: { mateGiftCount: number }) {
   if (mateGiftCount <= 0) return null;
@@ -56,13 +77,21 @@ function OrderSummaryPanel({
           lines.map((line) => (
             <div key={line.product.id} className="flex gap-3 rounded-2xl bg-[#FAF9F5] p-3">
               <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-[#F1EFE7]">
-                <img src={line.product.image} alt={line.product.name} className="h-full w-full object-cover" />
+                <img
+                  src={line.product.image}
+                  alt={line.product.name}
+                  className="h-full w-full object-cover"
+                />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="line-clamp-2 text-sm font-semibold text-[#222222]">{line.product.name}</p>
+                <p className="line-clamp-2 text-sm font-semibold text-[#222222]">
+                  {line.product.name}
+                </p>
                 <div className="mt-2 flex items-center justify-between gap-3 text-xs text-[#222222]/55">
                   <span>Số lượng: {line.quantity}</span>
-                  <span className={`font-semibold ${line.product.oldPrice ? "text-[#d12f2f]" : "text-[#1E5B38]"}`}>
+                  <span
+                    className={`font-semibold ${line.product.oldPrice ? "text-[#d12f2f]" : "text-[#1E5B38]"}`}
+                  >
                     {formatVnd(line.quantity * line.product.price)}
                   </span>
                 </div>
@@ -79,10 +108,14 @@ function OrderSummaryPanel({
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-[#222222]/60">Phí vận chuyển</span>
-          <span className="font-semibold text-[#222222]">{shipping === 0 ? "Miễn phí" : formatVnd(shipping)}</span>
+          <span className="font-semibold text-[#222222]">
+            {shipping === 0 ? "Miễn phí" : formatVnd(shipping)}
+          </span>
         </div>
         {subtotal > 0 && subtotal < 250000 ? (
-          <p className="text-xs text-[#b5502f]">Đơn hàng dưới 250.000đ đang được cộng 30.000đ phí giao hàng.</p>
+          <p className="text-xs text-[#b5502f]">
+            Đơn hàng dưới 250.000đ đang được cộng 30.000đ phí giao hàng.
+          </p>
         ) : null}
         <div className="flex items-center justify-between text-sm">
           <span className="text-[#222222]/60">Voucher {VOUCHER_CODE}</span>
@@ -102,6 +135,7 @@ function OrderSummaryPanel({
           <div className="mt-3 flex flex-wrap gap-3">
             <a
               href={`tel:${CONTACT_PHONE}`}
+              onClick={() => trackContactClick("phone", "checkout_sidebar")}
               className="rounded-full bg-[#1E5B38] px-4 py-2.5 text-sm font-semibold text-white"
             >
               Gọi {CONTACT_PHONE}
@@ -110,6 +144,7 @@ function OrderSummaryPanel({
               href={ZALO_URL}
               target="_blank"
               rel="noreferrer"
+              onClick={() => trackContactClick("zalo", "checkout_sidebar")}
               className="rounded-full border border-[#1E5B38]/15 bg-white px-4 py-2.5 text-sm font-semibold text-[#1E5B38]"
             >
               Zalo {CONTACT_PHONE}
@@ -136,6 +171,8 @@ function CheckoutModal() {
     note: "",
     payment: "cod",
   });
+  const checkoutTrackedRef = useRef(false);
+  const voucherTrackedRef = useRef(false);
 
   const mateCount = useMemo(
     () =>
@@ -146,7 +183,9 @@ function CheckoutModal() {
   );
   const mateGiftCount = mateCount >= 5 ? 2 : mateCount >= 3 ? 1 : 0;
   const shipping = subtotal >= 250000 ? 0 : lines.length > 0 ? SHIPPING_FEE : 0;
-  const discount = couponApplied && couponCode.trim().toUpperCase() === VOUCHER_CODE ? VOUCHER_DISCOUNT : 0;
+  const normalizedCouponCode = normalizeVoucherCode(couponCode);
+  const voucherMatches = normalizedCouponCode === VOUCHER_CODE;
+  const discount = couponApplied && voucherMatches ? VOUCHER_DISCOUNT : 0;
   const grandTotal = Math.max(0, subtotal + shipping - discount);
 
   useEffect(() => {
@@ -183,8 +222,32 @@ function CheckoutModal() {
       setSubmitError("");
       setCouponCode("");
       setCouponApplied(false);
+      checkoutTrackedRef.current = false;
+      voucherTrackedRef.current = false;
     }
   }, [isCheckoutOpen]);
+
+  useEffect(() => {
+    if (!isCheckoutOpen || checkoutTrackedRef.current) return;
+    trackInitiateCheckout(lines, grandTotal);
+    checkoutTrackedRef.current = true;
+  }, [grandTotal, isCheckoutOpen, lines]);
+
+  useEffect(() => {
+    if (!isCheckoutOpen || !couponApplied || !voucherMatches || voucherTrackedRef.current) return;
+    trackApplyVoucher(VOUCHER_CODE, VOUCHER_DISCOUNT, grandTotal);
+    voucherTrackedRef.current = true;
+  }, [couponApplied, grandTotal, isCheckoutOpen, voucherMatches]);
+
+  const applyVoucher = () => {
+    setCouponCode(normalizedCouponCode);
+    const isValid = normalizedCouponCode === VOUCHER_CODE;
+    setCouponApplied(isValid);
+    if (isValid) {
+      unlockVoucher();
+      setCouponClaimed(true);
+    }
+  };
 
   const matePromotionSummary =
     mateGiftCount >= 2
@@ -196,7 +259,9 @@ function CheckoutModal() {
   async function submitOrder() {
     if (lines.length === 0) return;
 
-    const noteWithPromotion = [customer.note.trim(), matePromotionSummary].filter(Boolean).join(" | ");
+    const noteWithPromotion = [customer.note.trim(), matePromotionSummary]
+      .filter(Boolean)
+      .join(" | ");
 
     const payload = {
       customer: {
@@ -222,7 +287,7 @@ function CheckoutModal() {
       shipping,
       discount,
       grandTotal,
-      voucherCode: couponCode.trim().toUpperCase(),
+      voucherCode: normalizedCouponCode,
       couponApplied,
       couponClaimed,
       mateCount,
@@ -278,12 +343,18 @@ function CheckoutModal() {
 
           <div className="flex min-h-0 flex-col overflow-hidden px-5 py-5 md:px-7 md:py-6">
             <div className="mb-5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#1E5B38]/55">Checkout</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#1E5B38]/55">
+                Checkout
+              </p>
               <h2 className="mt-2 pr-10 text-2xl font-bold tracking-tight text-[#1E5B38] md:text-[2rem]">
                 Hoàn tất đơn hàng SADU
               </h2>
-              <p className="mt-2 text-xs font-medium text-[#b5502f]">Đơn dưới 250.000đ sẽ cộng thêm 30.000đ phí ship.</p>
-              <p className="mt-2 max-w-lg text-sm leading-relaxed text-[#222222]/60">Điền thông tin thanh toán.</p>
+              <p className="mt-2 text-xs font-medium text-[#b5502f]">
+                Đơn dưới 250.000đ sẽ cộng thêm 30.000đ phí ship.
+              </p>
+              <p className="mt-2 max-w-lg text-sm leading-relaxed text-[#222222]/60">
+                Điền thông tin thanh toán.
+              </p>
             </div>
 
             <div className="mb-4 rounded-[24px] bg-white p-4 shadow-sm md:hidden">
@@ -291,31 +362,44 @@ function CheckoutModal() {
                 <div>
                   <p className="text-sm font-semibold text-[#222222]">Tóm tắt đơn hàng</p>
                   <p className="mt-1 text-xs text-[#222222]/55">
-                    {lines.length > 0 ? `${lines.reduce((sum, line) => sum + line.quantity, 0)} sản phẩm` : "Giỏ hàng đang trống"}
+                    {lines.length > 0
+                      ? `${lines.reduce((sum, line) => sum + line.quantity, 0)} sản phẩm`
+                      : "Giỏ hàng đang trống"}
                   </p>
                 </div>
                 <p className="text-lg font-bold text-[#1E5B38]">{formatVnd(grandTotal)}</p>
               </div>
               {subtotal > 0 && subtotal < 250000 ? (
-                <p className="mt-3 text-xs text-[#b5502f]">Đơn dưới 250.000đ đang cộng 30.000đ phí giao hàng.</p>
+                <p className="mt-3 text-xs text-[#b5502f]">
+                  Đơn dưới 250.000đ đang cộng 30.000đ phí giao hàng.
+                </p>
               ) : null}
             </div>
 
             {submitted ? (
               <div className="rounded-[28px] bg-white p-6 shadow-sm">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1E5B38] text-white">
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <svg
+                    width="26"
+                    height="26"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
                     <path d="M5 12.5l4.5 4.5L19 7" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
-                <h3 className="mt-4 text-xl font-bold text-[#1E5B38]">Đã ghi nhận đơn hàng</h3>
+                <h3 className="mt-4 text-xl font-bold text-[#1E5B38]">Đã gửi yêu cầu đặt hàng</h3>
                 <p className="mt-2 text-sm leading-relaxed text-[#222222]/65">
-                  Cảm ơn {customer.name || "bạn"} đã đặt hàng. Đội ngũ SADU sẽ liên hệ qua số{" "}
-                  <span className="font-semibold">{customer.phone || CONTACT_PHONE}</span> để xác nhận đơn sớm nhất.
+                  Cảm ơn {customer.name || "bạn"} đã gửi thông tin. Đội ngũ SADU sẽ liên hệ qua số{" "}
+                  <span className="font-semibold">{customer.phone || CONTACT_PHONE}</span> để xác
+                  nhận đơn sớm nhất.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
                   <a
                     href={`tel:${CONTACT_PHONE}`}
+                    onClick={() => trackContactClick("phone", "checkout_success")}
                     className="rounded-full bg-[#1E5B38] px-5 py-3 text-sm font-semibold text-white"
                   >
                     Gọi {CONTACT_PHONE}
@@ -324,6 +408,7 @@ function CheckoutModal() {
                     href={ZALO_URL}
                     target="_blank"
                     rel="noreferrer"
+                    onClick={() => trackContactClick("zalo", "checkout_success")}
                     className="rounded-full border border-[#1E5B38]/15 bg-white px-5 py-3 text-sm font-semibold text-[#1E5B38]"
                   >
                     Nhắn Zalo xác nhận
@@ -365,7 +450,9 @@ function CheckoutModal() {
                       <input
                         required
                         value={customer.phone}
-                        onChange={(e) => setCustomer((prev) => ({ ...prev, phone: e.target.value }))}
+                        onChange={(e) =>
+                          setCustomer((prev) => ({ ...prev, phone: e.target.value }))
+                        }
                         className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#1E5B38]"
                         placeholder="0355532863"
                       />
@@ -378,7 +465,9 @@ function CheckoutModal() {
                       required
                       rows={3}
                       value={customer.address}
-                      onChange={(e) => setCustomer((prev) => ({ ...prev, address: e.target.value }))}
+                      onChange={(e) =>
+                        setCustomer((prev) => ({ ...prev, address: e.target.value }))
+                      }
                       className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#1E5B38]"
                       placeholder="Số nhà, thôn/xóm, xã/phường, quận/huyện, tỉnh/thành"
                     />
@@ -398,42 +487,40 @@ function CheckoutModal() {
                   <div className="rounded-[24px] bg-white p-4 shadow-sm">
                     <div className="mb-3 flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#b5502f]">Voucher 5K</p>
-                        <p className="mt-1 text-sm text-[#222222]/65">Nhập mã voucher.</p>
+                        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#b5502f]">
+                          Voucher 5K
+                        </p>
+                        <p className="mt-1 text-sm text-[#222222]/65">
+                          Nhập mã voucher hoặc lấy nhanh từ popup.
+                        </p>
                       </div>
                       <div className="rounded-full bg-[#fff3ee] px-3 py-1 text-sm font-bold text-[#b5502f]">
                         {formatVnd(VOUCHER_DISCOUNT)}
                       </div>
                     </div>
 
-                    {!couponClaimed ? (
-                      <div className="rounded-2xl border border-dashed border-[#D6B36A]/40 bg-[#fffdf8] px-4 py-3 text-sm text-[#222222]/70">
-                        Mã <span className="font-bold text-[#1E5B38]">{VOUCHER_CODE}</span> sẽ hoạt động sau khi khách bấm “Lấy mã” ở voucher ngoài landing page.
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-3 sm:flex-row">
-                        <input
-                          value={couponCode}
-                          onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                          className="w-full rounded-2xl border border-[#D6B36A]/40 bg-[#fffdf8] px-4 py-3 text-sm font-semibold tracking-[0.08em] text-[#1E5B38] outline-none transition focus:border-[#1E5B38]"
-                          placeholder="Nhập mã SONGLANH"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setCouponApplied(couponCode.trim().toUpperCase() === VOUCHER_CODE)}
-                          className="rounded-2xl bg-[#1E5B38] px-5 py-3 text-sm font-semibold text-white"
-                        >
-                          Áp dụng
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                      <input
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        className="w-full rounded-2xl border border-[#D6B36A]/40 bg-[#fffdf8] px-4 py-3 text-sm font-semibold tracking-[0.08em] text-[#1E5B38] outline-none transition focus:border-[#1E5B38]"
+                        placeholder="Nhập mã SONGLANH"
+                      />
+                      <button
+                        type="button"
+                        onClick={applyVoucher}
+                        className="rounded-2xl bg-[#1E5B38] px-5 py-3 text-sm font-semibold text-white"
+                      >
+                        Áp dụng
+                      </button>
+                    </div>
 
                     <p className="mt-2 text-xs text-[#222222]/55">
-                      {couponApplied && couponCode.trim().toUpperCase() === VOUCHER_CODE
+                      {couponApplied && voucherMatches
                         ? `Đã áp dụng mã ${VOUCHER_CODE} thành công.`
                         : couponClaimed
-                          ? `Nhập đúng mã ${VOUCHER_CODE} để giảm ${formatVnd(VOUCHER_DISCOUNT)}.`
-                          : "Bấm lấy mã ở voucher ngoài landing page để mở ưu đãi."}
+                          ? `Mã ${VOUCHER_CODE} đã sẵn sàng. Nhập đúng mã để giảm ${formatVnd(VOUCHER_DISCOUNT)}.`
+                          : `Khách có thể nhập trực tiếp mã ${VOUCHER_CODE} để giảm ${formatVnd(VOUCHER_DISCOUNT)}.`}
                     </p>
                   </div>
 
@@ -457,7 +544,9 @@ function CheckoutModal() {
                             name="payment"
                             value={option.id}
                             checked={customer.payment === option.id}
-                            onChange={(e) => setCustomer((prev) => ({ ...prev, payment: e.target.value }))}
+                            onChange={(e) =>
+                              setCustomer((prev) => ({ ...prev, payment: e.target.value }))
+                            }
                           />
                           {option.label}
                         </label>
@@ -475,7 +564,9 @@ function CheckoutModal() {
                     disabled={lines.length === 0 || isSubmitting}
                     className="w-full rounded-full bg-[#1E5B38] py-4 text-sm font-semibold text-white shadow-[0_18px_40px_-20px_rgba(30,91,56,0.55)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {isSubmitting ? "Đang gửi đơn hàng..." : `Xác nhận đặt hàng · ${formatVnd(grandTotal)}`}
+                    {isSubmitting
+                      ? "Đang gửi đơn hàng..."
+                      : `Xác nhận đặt hàng · ${formatVnd(grandTotal)}`}
                   </button>
                 </div>
               </form>
@@ -500,6 +591,17 @@ function CheckoutModal() {
 
 export function CartDrawer() {
   const { lines, isOpen, closeCart, setQuantity, removeLine, subtotal, openCheckout } = useCart();
+  const cartTrackedRef = useRef(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      cartTrackedRef.current = false;
+      return;
+    }
+    if (cartTrackedRef.current) return;
+    trackViewCart(lines, subtotal);
+    cartTrackedRef.current = true;
+  }, [isOpen, lines, subtotal]);
 
   return (
     <>
@@ -528,7 +630,14 @@ export function CartDrawer() {
               onClick={closeCart}
               className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-black/5"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#222222" strokeWidth="2">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#222222"
+                strokeWidth="2"
+              >
                 <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
               </svg>
             </button>
@@ -538,20 +647,38 @@ export function CartDrawer() {
             {lines.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
                 <p className="text-sm text-[#222222]/50">Giỏ hàng của bạn đang trống.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeCart();
+                    scrollToSection("categories");
+                  }}
+                  className="rounded-full bg-[#1E5B38] px-5 py-2.5 text-sm font-semibold text-white"
+                >
+                  Xem sản phẩm nổi bật
+                </button>
               </div>
             ) : (
               <ul className="space-y-4">
                 {lines.map((line) => (
                   <li key={line.product.id} className="flex gap-3">
                     <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[#F1EFE7]">
-                      <img src={line.product.image} alt={line.product.name} className="h-full w-full object-cover" />
+                      <img
+                        src={line.product.image}
+                        alt={line.product.name}
+                        className="h-full w-full object-cover"
+                      />
                     </div>
                     <div className="flex-1">
-                      <p className="line-clamp-1 text-sm font-medium text-[#222222]">{line.product.name}</p>
-                      <p className={`mt-1 text-sm font-semibold ${line.product.oldPrice ? "text-[#d12f2f]" : "text-[#1E5B38]"}`}>
+                      <p className="line-clamp-1 text-sm font-medium text-[#222222]">
+                        {line.product.name}
+                      </p>
+                      <p
+                        className={`mt-1 text-sm font-semibold ${line.product.oldPrice ? "text-[#d12f2f]" : "text-[#1E5B38]"}`}
+                      >
                         {formatVnd(line.product.price)}
                       </p>
-                <div className="mt-2 flex items-center gap-2">
+                      <div className="mt-2 flex items-center gap-2">
                         <div className="flex items-center rounded-full border border-black/10">
                           <button
                             type="button"
@@ -560,7 +687,9 @@ export function CartDrawer() {
                           >
                             −
                           </button>
-                          <span className="w-5 text-center text-xs font-medium">{line.quantity}</span>
+                          <span className="w-5 text-center text-xs font-medium">
+                            {line.quantity}
+                          </span>
                           <button
                             type="button"
                             onClick={() => setQuantity(line.product.id, line.quantity + 1)}
@@ -586,11 +715,15 @@ export function CartDrawer() {
 
           <div className="sticky bottom-0 border-t border-black/8 bg-[#FAF9F5] px-6 py-5">
             <div className="mb-3 rounded-[24px] border border-[#D6B36A]/25 bg-white px-4 py-3">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#b5502f]">Voucher landing page</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#b5502f]">
+                Voucher landing page
+              </p>
               <div className="mt-2 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xl font-bold tracking-tight text-[#1E5B38]">{VOUCHER_CODE}</p>
-                  <p className="text-xs text-[#222222]/55">Khách cần bấm lấy mã trước khi áp dụng trong checkout</p>
+                  <p className="text-xs text-[#222222]/55">
+                    Có thể nhập trực tiếp trong checkout hoặc lấy nhanh ở popup voucher
+                  </p>
                 </div>
                 <div className="rounded-full bg-[#fff2e8] px-3 py-1.5 text-sm font-bold text-[#b5502f]">
                   -5K
@@ -605,7 +738,9 @@ export function CartDrawer() {
             <p className="mb-4 text-xs text-[#222222]/55">
               Miễn phí vận chuyển cho đơn từ 250.000đ. Thanh toán sẽ mở form checkout chi tiết.
             </p>
-            <p className="-mt-2 mb-4 text-xs font-medium text-[#b5502f]">Đơn dưới 250.000đ sẽ cộng thêm 30.000đ phí ship.</p>
+            <p className="-mt-2 mb-4 text-xs font-medium text-[#b5502f]">
+              Đơn dưới 250.000đ sẽ cộng thêm 30.000đ phí ship.
+            </p>
             <button
               type="button"
               onClick={openCheckout}
@@ -637,6 +772,7 @@ export function SupportBubble() {
           <div className="mt-4 grid gap-2">
             <a
               href={`tel:${CONTACT_PHONE}`}
+              onClick={() => trackContactClick("phone", "support_bubble")}
               className="flex items-center justify-between rounded-2xl bg-[#1E5B38] px-4 py-3 text-sm font-semibold text-white"
             >
               <span>Gọi {CONTACT_PHONE}</span>
@@ -646,9 +782,14 @@ export function SupportBubble() {
               href={ZALO_URL}
               target="_blank"
               rel="noreferrer"
+              onClick={() => trackContactClick("zalo", "support_bubble")}
               className="flex items-center gap-3 rounded-2xl border border-[#1E5B38]/10 bg-[#f8fbff] px-4 py-3 text-sm font-semibold text-[#1266f1]"
             >
-              <img src={assetUrl("/assets/icons/zalo.webp")} alt="Zalo" className="h-6 w-6 rounded-full object-cover" />
+              <img
+                src={assetUrl("/assets/icons/zalo.webp")}
+                alt="Zalo"
+                className="h-6 w-6 rounded-full object-cover"
+              />
               Nhắn Zalo {CONTACT_PHONE}
             </a>
           </div>
@@ -660,7 +801,11 @@ export function SupportBubble() {
         onClick={() => setOpen((v) => !v)}
         className="flex h-13 w-13 animate-[pulse_3s_ease-in-out_infinite] items-center justify-center rounded-full bg-white shadow-[0_10px_25px_-8px_rgba(0,0,0,0.35)] transition active:scale-90"
       >
-        <img src={assetUrl("/assets/icons/zalo.webp")} alt="Zalo" className="h-9 w-9 rounded-full object-cover" />
+        <img
+          src={assetUrl("/assets/icons/zalo.webp")}
+          alt="Zalo"
+          className="h-9 w-9 rounded-full object-cover"
+        />
       </button>
     </div>
   );
@@ -668,20 +813,33 @@ export function SupportBubble() {
 
 export function MobilePurchaseBar() {
   const { count, subtotal, openCart } = useCart();
+  const hasItems = count > 0;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-black/8 bg-[#FAF9F5]/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-lg md:hidden">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-[11px] text-[#222222]/50">{count} sản phẩm</p>
-          <p className="text-base font-bold text-[#1E5B38]">{formatVnd(subtotal)}</p>
+          <p className="text-[11px] text-[#222222]/50">
+            {hasItems ? `${count} sản phẩm` : "Ưu đãi đang mở"}
+          </p>
+          <p className="text-base font-bold text-[#1E5B38]">
+            {hasItems
+              ? formatVnd(subtotal)
+              : `Mã ${VOUCHER_CODE} giảm ${formatVnd(VOUCHER_DISCOUNT)}`}
+          </p>
         </div>
         <button
           type="button"
-          onClick={openCart}
+          onClick={() => {
+            if (hasItems) {
+              openCart();
+              return;
+            }
+            scrollToSection("categories");
+          }}
           className="flex-1 max-w-[220px] rounded-full bg-[#1E5B38] py-3.5 text-sm font-semibold text-white transition active:scale-[0.97]"
         >
-          Thanh toán
+          {hasItems ? "Xem giỏ hàng" : "Xem sản phẩm"}
         </button>
       </div>
     </div>
@@ -728,22 +886,27 @@ export function CouponWidget() {
         >
           ✕
         </button>
-        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#D6B36A]">Voucher ưu đãi</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#D6B36A]">
+          Voucher ưu đãi
+        </p>
         <p className="mt-2 text-3xl font-bold tracking-tight">{formatVnd(VOUCHER_DISCOUNT)}</p>
-        <p className="mt-2 text-sm text-white/80">Khách cần lấy mã trước, sau đó mới áp dụng được trong form thanh toán.</p>
+        <p className="mt-2 text-sm text-white/80">
+          Bấm lấy mã để sao chép nhanh, hoặc nhập trực tiếp trong form thanh toán.
+        </p>
       </div>
 
       <div className="space-y-3 px-5 py-4">
         <div className="rounded-[20px] border border-dashed border-[#D6B36A]/50 bg-[#fffbf2] px-4 py-3 text-center">
           <p className="text-[11px] uppercase tracking-[0.16em] text-[#1E5B38]/55">Mã voucher</p>
-          <p className="mt-1 text-xl font-extrabold tracking-[0.18em] text-[#1E5B38]">{VOUCHER_CODE}</p>
+          <p className="mt-1 text-xl font-extrabold tracking-[0.18em] text-[#1E5B38]">
+            {VOUCHER_CODE}
+          </p>
         </div>
         <button
           type="button"
           onClick={async () => {
             await navigator.clipboard.writeText(VOUCHER_CODE);
-            window.localStorage.setItem(VOUCHER_STORAGE_KEY, "1");
-            window.dispatchEvent(new Event(VOUCHER_UNLOCK_EVENT));
+            unlockVoucher();
             setClaimed(true);
           }}
           className="w-full rounded-full bg-[#1E5B38] py-3 text-sm font-semibold text-white"
