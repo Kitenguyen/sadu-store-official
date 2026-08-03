@@ -89,8 +89,7 @@ interface Controller {
 
 type ThemeStyle = CSSProperties & Record<`--ss-${string}`, string | number>;
 
-const clamp = (value: number, min = 0, max = 1) =>
-  Math.min(max, Math.max(min, value));
+const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
 const smoothstep = (value: number) => {
   const x = clamp(value);
@@ -121,8 +120,7 @@ function buildSegments(
       linger: scene.linger ?? 0,
       mobileClip: scene.mobileClip,
       mobilePoster: scene.mobilePoster,
-      mobileObjectPosition:
-        scene.mobileObjectPosition ?? scene.objectPosition ?? "50% 50%",
+      mobileObjectPosition: scene.mobileObjectPosition ?? scene.objectPosition ?? "50% 50%",
       nextSectionIndex: index,
       objectPosition: scene.objectPosition ?? "50% 50%",
       poster: scene.poster,
@@ -134,9 +132,7 @@ function buildSegments(
     const connector = connectors[index];
     if (index < scenes.length - 1 && connector?.clip) {
       if (connector.mobileClip && !connector.mobilePoster) {
-        throw new Error(
-          `Connector after ${scene.id} needs mobilePoster for mobileClip`,
-        );
+        throw new Error(`Connector after ${scene.id} needs mobilePoster for mobileClip`);
       }
       const nextScene = scenes[index + 1];
       result.push({
@@ -147,9 +143,7 @@ function buildSegments(
         mobileClip: connector.mobileClip,
         mobilePoster: connector.mobilePoster,
         mobileObjectPosition:
-          nextScene.mobileObjectPosition ??
-          nextScene.objectPosition ??
-          "50% 50%",
+          nextScene.mobileObjectPosition ?? nextScene.objectPosition ?? "50% 50%",
         nextSectionIndex: index + 1,
         objectPosition: nextScene.objectPosition ?? "50% 50%",
         poster: connector.poster,
@@ -173,10 +167,7 @@ export function ScrollScrub({
   const controllerRef = useRef<Controller | null>(null);
   const onActiveRef = useRef(onActiveSectionChange);
   const [activeSection, setActiveSection] = useState(0);
-  const segments = useMemo(
-    () => buildSegments(scenes, connectors ?? []),
-    [connectors, scenes],
-  );
+  const segments = useMemo(() => buildSegments(scenes, connectors ?? []), [connectors, scenes]);
 
   onActiveRef.current = onActiveSectionChange;
 
@@ -186,25 +177,14 @@ export function ScrollScrub({
       return;
     }
 
-    const layerNodes = [
-      ...root.querySelectorAll<HTMLElement>("[data-scroll-scrub-layer]"),
-    ];
-    const bandNodes = [
-      ...root.querySelectorAll<HTMLElement>("[data-scroll-scrub-band]"),
-    ];
-    if (
-      layerNodes.length !== segments.length ||
-      bandNodes.length !== segments.length
-    ) {
+    const layerNodes = [...root.querySelectorAll<HTMLElement>("[data-scroll-scrub-layer]")];
+    const bandNodes = [...root.querySelectorAll<HTMLElement>("[data-scroll-scrub-band]")];
+    if (layerNodes.length !== segments.length || bandNodes.length !== segments.length) {
       throw new Error("ScrollScrub segment markup is out of sync");
     }
 
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    const coarsePointer = window.matchMedia(
-      "(hover: none) and (pointer: coarse)",
-    ).matches;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const coarsePointer = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
     const smallViewport = window.matchMedia("(max-width: 860px)");
     const isMobile = () => coarsePointer || smallViewport.matches;
     const sourceFor = (segment: RuntimeSegment) =>
@@ -275,10 +255,7 @@ export function ScrollScrub({
       layoutWidth = window.innerWidth;
 
       for (const segment of runtime) {
-        if (
-          segment.loadedSource &&
-          segment.loadedSource !== sourceFor(segment)
-        ) {
+        if (segment.loadedSource && segment.loadedSource !== sourceFor(segment)) {
           unloadClip(segment);
         }
         const rect = segment.band.getBoundingClientRect();
@@ -309,8 +286,7 @@ export function ScrollScrub({
         segment.loading ||
         segment.ready ||
         segment.failed ||
-        !source ||
-        (isMobile() && !userReady)
+        !source
       ) {
         return;
       }
@@ -328,11 +304,7 @@ export function ScrollScrub({
           throw new Error(`Clip failed: ${response.status}`);
         }
         const blob = await response.blob();
-        if (
-          destroyed ||
-          request.signal.aborted ||
-          segment.loadedSource !== source
-        ) {
+        if (destroyed || request.signal.aborted || segment.loadedSource !== source) {
           return;
         }
 
@@ -361,11 +333,7 @@ export function ScrollScrub({
         video.addEventListener(
           "loadeddata",
           () => {
-            if (
-              userReady &&
-              segment.video === video &&
-              segment.loadedSource === source
-            ) {
+            if (userReady && segment.video === video && segment.loadedSource === source) {
               void primeVideo(video);
             }
           },
@@ -429,9 +397,7 @@ export function ScrollScrub({
 
         const length = Math.max(segment.end - segment.start, 1);
         const local = clamp((y - segment.start) / length);
-        segment.target = segment.linger
-          ? lingerEase(local, segment.linger)
-          : local;
+        segment.target = segment.linger ? lingerEase(local, segment.linger) : local;
 
         let outside = 0;
         if (y < segment.start) {
@@ -449,10 +415,7 @@ export function ScrollScrub({
         segment.layer.style.opacity = String(opacity);
         segment.layer.style.zIndex = index === currentIndex ? "2" : "1";
 
-        if (
-          y > segment.start - 1.5 * viewportHeight &&
-          y < segment.end + 1.5 * viewportHeight
-        ) {
+        if (y > segment.start - 1.5 * viewportHeight && y < segment.end + 1.5 * viewportHeight) {
           ensurePosterLoaded(segment);
           void loadClip(segment);
         }
@@ -482,16 +445,12 @@ export function ScrollScrub({
         if (!video || !segment.ready || video.seeking) {
           continue;
         }
-        if (
-          !segment.visible &&
-          Math.abs(segment.current - segment.target) < 0.002
-        ) {
+        if (!segment.visible && Math.abs(segment.current - segment.target) < 0.002) {
           continue;
         }
 
         segment.current += (segment.target - segment.current) * 0.2;
-        const targetTime =
-          clamp(segment.current, 0, 0.999) * (video.duration || 1);
+        const targetTime = clamp(segment.current, 0, 0.999) * (video.duration || 1);
         const epsilon = isMobile() ? 0.02 : 0.008;
         if (Math.abs(video.currentTime - targetTime) > epsilon) {
           try {
@@ -526,6 +485,9 @@ export function ScrollScrub({
     };
 
     const onScroll = () => {
+      if (!userReady) {
+        userReady = true;
+      }
       if (!started) {
         startRuntime();
       }
@@ -556,8 +518,7 @@ export function ScrollScrub({
     controllerRef.current = {
       jumpToSection(index) {
         const segment = runtime.find(
-          (candidate) =>
-            candidate.kind === "scene" && candidate.sectionIndex === index,
+          (candidate) => candidate.kind === "scene" && candidate.sectionIndex === index,
         );
         if (!segment) {
           return;
@@ -565,8 +526,7 @@ export function ScrollScrub({
         if (!started) {
           startRuntime();
         }
-        const top =
-          rootTop + segment.start + 0.15 * (segment.end - segment.start);
+        const top = rootTop + segment.start + 0.15 * (segment.end - segment.start);
         window.scrollTo({
           behavior: reduceMotion ? "auto" : "smooth",
           top,
@@ -587,9 +547,7 @@ export function ScrollScrub({
     });
 
     ensurePosterLoaded(runtime[0]);
-    if (!isMobile()) {
-      startRuntime();
-    }
+    startRuntime();
 
     return () => {
       destroyed = true;
@@ -717,12 +675,8 @@ export function ScrollScrub({
             >
               <div className="scroll-scrub__chapter-pin">
                 <div className="scroll-scrub__copy">
-                  {scene.kicker ? (
-                    <p className="scroll-scrub__kicker">{scene.kicker}</p>
-                  ) : null}
-                  <Heading className="scroll-scrub__title">
-                    {scene.title}
-                  </Heading>
+                  {scene.kicker ? <p className="scroll-scrub__kicker">{scene.kicker}</p> : null}
+                  <Heading className="scroll-scrub__title">{scene.title}</Heading>
                   <p className="scroll-scrub__body">{scene.body}</p>
                   {scene.tags?.length ? (
                     <ul className="scroll-scrub__tags">
