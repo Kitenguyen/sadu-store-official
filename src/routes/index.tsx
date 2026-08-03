@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { Certifications } from "../components/certifications";
-import { Faq } from "../components/faq";
+import { FAQS, Faq } from "../components/faq";
 import { FarmStory } from "../components/farm-story";
 import { FeaturedProducts } from "../components/featured-products";
 import { CartDrawer, CouponWidget, MobilePurchaseBar, SupportBubble } from "../components/floating-widgets";
@@ -12,13 +12,28 @@ import { ScrollScrub, type ScrollScrubScene } from "../components/scroll-scrub/s
 import { SiteFooter } from "../components/site-footer";
 import { SiteNav } from "../components/site-nav";
 import { SongLanhJourney } from "../components/song-lanh-journey";
+import { StructuredData } from "../components/StructuredData";
 import { WhyChooseUs } from "../components/why-choose-us";
 import { CartProvider } from "../lib/cart-context";
-import { assetUrl, SITE_URL } from "../lib/site";
+import { products } from "../lib/products";
+import { assetUrl, SITE_ORIGIN, SITE_URL } from "../lib/site";
 
 export const Route = createFileRoute("/")({
   head: () => ({
-    links: [{ rel: "canonical", href: SITE_URL }],
+    links: [
+      {
+        rel: "preload",
+        as: "image",
+        href: assetUrl("/assets/world/scene-01-poster.jpg"),
+        media: "(min-width: 861px)",
+      },
+      {
+        rel: "preload",
+        as: "image",
+        href: assetUrl("/assets/world/scene-01-mobile-poster.jpg"),
+        media: "(max-width: 860px)",
+      },
+    ],
   }),
   component: Index,
 });
@@ -29,6 +44,73 @@ const THEME = {
   ink: "#FAF9F5",
   muted: "rgba(250,249,245,0.7)",
 };
+
+const PAGE_DESCRIPTION =
+  "SADU Store Official mang den bo suu tap Tra Mate, san pham thao duoc khuyen mai va combo uu dai giao hang toan quoc.";
+const PRIMARY_IMAGE_URL = new URL(assetUrl("/presets/cover.png"), SITE_ORIGIN).toString();
+const HOMEPAGE_SCHEMA = JSON.stringify([
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${SITE_URL}#organization`,
+    name: "SADU Store Official",
+    url: SITE_URL,
+    logo: new URL(assetUrl("/assets/brand/mark.png"), SITE_ORIGIN).toString(),
+    image: PRIMARY_IMAGE_URL,
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        telephone: "+84-355532863",
+        areaServed: "VN",
+        availableLanguage: ["vi"],
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${SITE_URL}#website`,
+    url: SITE_URL,
+    name: "SADU Store Official",
+    inLanguage: "vi-VN",
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${SITE_URL}#webpage`,
+    url: SITE_URL,
+    name: "SADU Store Official",
+    description: PAGE_DESCRIPTION,
+    inLanguage: "vi-VN",
+    isPartOf: { "@id": `${SITE_URL}#website` },
+    primaryImageOfPage: PRIMARY_IMAGE_URL,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "@id": `${SITE_URL}#faq`,
+    mainEntity: FAQS.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.a,
+      },
+    })),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "@id": `${SITE_URL}#products`,
+    itemListElement: products.map((product, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: product.url,
+      name: product.name,
+    })),
+  },
+]);
 
 const SCENES: ScrollScrubScene[] = [
   {
@@ -136,21 +218,24 @@ function Index() {
   return (
     <CartProvider>
       <div id="top" className="min-h-dvh bg-[#FAF9F5]">
+        <StructuredData json={HOMEPAGE_SCHEMA} />
         <SiteNav />
-        <ScrollScrub scenes={SCENES} theme={THEME} />
-        <TrustBadgesBar />
-        <div className="relative">
-          <SongLanhJourney />
-          <PromoBanner />
-          <Certifications />
-          <ProductCategories />
-          <FeaturedProducts />
-          <WhyChooseUs />
-          <FarmStory />
-          <Reviews />
-          <Faq />
-          <SiteFooter />
-        </div>
+        <main id="main-content">
+          <ScrollScrub scenes={SCENES} theme={THEME} />
+          <TrustBadgesBar />
+          <div className="relative">
+            <SongLanhJourney />
+            <PromoBanner />
+            <Certifications />
+            <ProductCategories />
+            <FeaturedProducts />
+            <WhyChooseUs />
+            <FarmStory />
+            <Reviews />
+            <Faq />
+            <SiteFooter />
+          </div>
+        </main>
         <CartDrawer />
         <CouponWidget />
         <SupportBubble />

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const FAQS = [
+export const FAQS = [
   {
     q: "Trà SADU có phù hợp uống hằng ngày không?",
     a: "Có. Các dòng trà thảo dược SADU được thiết kế để dùng đều đặn mỗi ngày, nguyên liệu 100% tự nhiên và không chất bảo quản.",

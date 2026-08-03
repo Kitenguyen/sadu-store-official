@@ -66,6 +66,9 @@ interface Segment {
 interface RuntimeSegment extends Segment {
   band: HTMLElement;
   layer: HTMLElement;
+  posterImage?: HTMLImageElement;
+  posterLoaded: boolean;
+  posterSource?: HTMLSourceElement;
   start: number;
   end: number;
   current: number;
@@ -214,6 +217,9 @@ export function ScrollScrub({
       failed: false,
       layer: layerNodes[index],
       loading: false,
+      posterImage: layerNodes[index].querySelector("img") ?? undefined,
+      posterLoaded: index === 0,
+      posterSource: layerNodes[index].querySelector("source") ?? undefined,
       ready: false,
       start: 0,
       target: 0,
@@ -225,10 +231,24 @@ export function ScrollScrub({
     let dirty = true;
     let frame = 0;
     let rootTop = 0;
+    let started = false;
     let total = 1;
     let viewportHeight = window.innerHeight;
     let layoutWidth = window.innerWidth;
     let userReady = false;
+
+    const ensurePosterLoaded = (segment: RuntimeSegment) => {
+      if (segment.posterLoaded) {
+        return;
+      }
+      if (segment.posterSource && segment.mobilePoster) {
+        segment.posterSource.srcset = segment.mobilePoster;
+      }
+      if (segment.posterImage) {
+        segment.posterImage.src = segment.poster;
+      }
+      segment.posterLoaded = true;
+    };
 
     const unloadClip = (segment: RuntimeSegment) => {
       segment.abort?.abort();
@@ -289,7 +309,8 @@ export function ScrollScrub({
         segment.loading ||
         segment.ready ||
         segment.failed ||
-        !source
+        !source ||
+        (isMobile() && !userReady)
       ) {
         return;
       }
@@ -432,6 +453,7 @@ export function ScrollScrub({
           y > segment.start - 1.5 * viewportHeight &&
           y < segment.end + 1.5 * viewportHeight
         ) {
+          ensurePosterLoaded(segment);
           void loadClip(segment);
         }
       }
@@ -493,10 +515,26 @@ export function ScrollScrub({
       frame = window.requestAnimationFrame(tick);
     };
 
+    const startRuntime = () => {
+      if (started || destroyed) {
+        return;
+      }
+      started = true;
+      layout();
+      dirty = true;
+      frame = window.requestAnimationFrame(tick);
+    };
+
     const onScroll = () => {
+      if (!started) {
+        startRuntime();
+      }
       dirty = true;
     };
     const onResize = () => {
+      if (!started) {
+        return;
+      }
       if (coarsePointer && window.innerWidth === layoutWidth) {
         return;
       }
@@ -507,6 +545,9 @@ export function ScrollScrub({
         return;
       }
       userReady = true;
+      if (!started) {
+        startRuntime();
+      }
       for (const segment of runtime) {
         void primeVideo(segment.video);
       }
@@ -520,6 +561,9 @@ export function ScrollScrub({
         );
         if (!segment) {
           return;
+        }
+        if (!started) {
+          startRuntime();
         }
         const top =
           rootTop + segment.start + 0.15 * (segment.end - segment.start);
@@ -542,8 +586,10 @@ export function ScrollScrub({
       passive: true,
     });
 
-    layout();
-    frame = window.requestAnimationFrame(tick);
+    ensurePosterLoaded(runtime[0]);
+    if (!isMobile()) {
+      startRuntime();
+    }
 
     return () => {
       destroyed = true;
@@ -600,7 +646,7 @@ export function ScrollScrub({
                   {segment.mobilePoster ? (
                     <source
                       media="(hover: none) and (pointer: coarse), (max-width: 860px)"
-                      srcSet={segment.mobilePoster}
+                      srcSet={index === 0 ? segment.mobilePoster : undefined}
                     />
                   ) : null}
                   <img
@@ -609,7 +655,7 @@ export function ScrollScrub({
                     decoding="async"
                     fetchPriority={index === 0 ? "high" : "auto"}
                     loading={index === 0 ? "eager" : "lazy"}
-                    src={segment.poster}
+                    src={index === 0 ? segment.poster : undefined}
                   />
                 </picture>
               </figure>
