@@ -79,8 +79,6 @@ interface RuntimeSegment extends Segment {
   failed: boolean;
   loadedSource?: string;
   video?: HTMLVideoElement;
-  objectUrl?: string;
-  abort?: AbortController;
 }
 
 interface Controller {
@@ -231,14 +229,8 @@ export function ScrollScrub({
     };
 
     const unloadClip = (segment: RuntimeSegment) => {
-      segment.abort?.abort();
       segment.video?.remove();
-      if (segment.objectUrl) {
-        URL.revokeObjectURL(segment.objectUrl);
-      }
-      delete segment.abort;
       delete segment.video;
-      delete segment.objectUrl;
       delete segment.loadedSource;
       segment.loading = false;
       segment.ready = false;
@@ -293,22 +285,12 @@ export function ScrollScrub({
 
       segment.loading = true;
       segment.loadedSource = source;
-      segment.abort = new AbortController();
-      const request = segment.abort;
 
       try {
-        const response = await fetch(source, {
-          signal: request.signal,
-        });
-        if (!response.ok) {
-          throw new Error(`Clip failed: ${response.status}`);
-        }
-        const blob = await response.blob();
-        if (destroyed || request.signal.aborted || segment.loadedSource !== source) {
+        if (destroyed || segment.loadedSource !== source) {
           return;
         }
 
-        const objectUrl = URL.createObjectURL(blob);
         const video = document.createElement("video");
         video.className = "scroll-scrub__video";
         video.muted = true;
@@ -316,7 +298,7 @@ export function ScrollScrub({
         video.preload = "auto";
         video.setAttribute("muted", "");
         video.setAttribute("playsinline", "");
-        video.src = objectUrl;
+        video.src = source;
 
         video.addEventListener(
           "loadedmetadata",
@@ -346,9 +328,7 @@ export function ScrollScrub({
               return;
             }
             video.remove();
-            URL.revokeObjectURL(objectUrl);
             delete segment.video;
-            delete segment.objectUrl;
             segment.failed = true;
             segment.loading = false;
             segment.ready = false;
@@ -368,14 +348,9 @@ export function ScrollScrub({
         );
 
         segment.layer.append(video);
-        segment.objectUrl = objectUrl;
         segment.video = video;
       } catch (error) {
-        if (
-          request.signal.aborted ||
-          (error instanceof Error && error.name === "AbortError") ||
-          segment.loadedSource !== source
-        ) {
+        if (segment.loadedSource !== source) {
           return;
         }
         segment.layer.dataset.videoFailed = "true";
