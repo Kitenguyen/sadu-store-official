@@ -57,13 +57,13 @@ export function Certifications() {
   const slides = [...CERTS, ...CERTS];
 
   return (
-    <section id="certifications" className="mx-auto max-w-[1440px] px-5 py-20 md:px-10 md:py-24">
-      <div className="overflow-hidden rounded-[24px] bg-white p-8 md:p-12">
-        <div className="mb-10 text-center">
-          <h2 className="text-2xl font-bold tracking-tight text-[#222222] md:text-3xl">
+    <section id="certifications" className="mx-auto max-w-[1440px] px-5 py-14 md:px-10 md:py-24">
+      <div className="overflow-hidden rounded-[24px] border border-[#d6b36a]/14 bg-[linear-gradient(135deg,#1a130f,#231913)] p-5 shadow-[0_40px_90px_-55px_rgba(0,0,0,0.85)] md:rounded-[28px] md:p-12">
+        <div className="mb-7 text-center md:mb-10">
+          <h2 className="text-[1.7rem] font-bold tracking-tight text-[#fff8ef] md:text-3xl">
             Chứng nhận & tiêu chuẩn
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-sm text-[#222222]/60">
+          <p className="mx-auto mt-2 max-w-md text-[13px] leading-6 text-[#f3e1ca]/62 md:mt-3 md:text-sm">
             Các chứng nhận được trình bày trực quan theo dải ảnh để khách dễ theo dõi và tăng độ tin cậy khi xem landing page.
           </p>
         </div>
@@ -73,7 +73,7 @@ export function Certifications() {
             {slides.map((cert, index) => (
               <article
                 key={`${cert.label}-${index}`}
-                className="w-[250px] shrink-0 overflow-hidden rounded-[22px] border border-[#1E5B38]/10 bg-[#F8F6F0] shadow-[0_20px_50px_rgba(0,0,0,0.06)]"
+                className="w-[250px] shrink-0 overflow-hidden rounded-[22px] border border-white/8 bg-[rgba(255,255,255,0.06)] shadow-[0_20px_50px_rgba(0,0,0,0.26)]"
               >
                 <div className="aspect-[4/5] overflow-hidden bg-white">
                   <img
@@ -84,8 +84,8 @@ export function Certifications() {
                   />
                 </div>
                 <div className="space-y-2 p-4">
-                  <p className="text-sm font-semibold text-[#222222]">{cert.label}</p>
-                  <p className="text-xs leading-relaxed text-[#222222]/60">{cert.detail}</p>
+                  <p className="text-sm font-semibold text-[#fff8ef]">{cert.label}</p>
+                  <p className="text-xs leading-relaxed text-[#f3e1ca]/62">{cert.detail}</p>
                 </div>
               </article>
             ))}

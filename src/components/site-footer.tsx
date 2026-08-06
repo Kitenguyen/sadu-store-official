@@ -1,5 +1,5 @@
-import { assetUrl } from "../lib/site";
 import { trackContactClick } from "../lib/analytics";
+import { assetUrl } from "../lib/site";
 
 const CONTACT_PHONE = "0355532863";
 
@@ -12,10 +12,10 @@ const QUICK_LINKS = [
 
 export function SiteFooter() {
   return (
-    <footer className="bg-[#1E5B38] pb-24 pt-16 text-[#FAF9F5] md:pb-12 md:pt-14">
+    <footer className="bg-[#0f0b08] pb-24 pt-16 text-[#FAF9F5] md:pb-12 md:pt-14">
       <div className="mx-auto max-w-[1440px] px-5 md:px-10">
-        <div className="rounded-[32px] border border-white/10 bg-white/5 px-6 py-8 backdrop-blur-sm md:px-8 md:py-9">
-          <div className="grid gap-8 lg:grid-cols-[1.25fr,0.85fr,0.9fr] lg:items-start">
+        <div className="rounded-[32px] border border-[#d6b36a]/12 bg-[linear-gradient(135deg,#18110d,#221813)] px-6 py-8 backdrop-blur-sm md:px-8 md:py-9">
+          <div className="grid gap-8 lg:grid-cols-[1.1fr,0.85fr,0.95fr] lg:items-start">
             <div>
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white/12">
@@ -35,9 +35,28 @@ export function SiteFooter() {
               </div>
 
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/68">
-                Ngày 18/5/2016 SADU ra đời với sứ mệnh đặc biệt, làm lan tỏa và biến vùng nguyên
-                liệu sạch trở thành từng sản phẩm thảo dược giá trị tới tay người tiêu dùng.
+                Ngày 18/5/2016 SADU ra đời với sứ mệnh đặc biệt, làm lan tỏa và biến vùng nguyên liệu sạch trở thành từng sản phẩm thảo dược giá trị tới tay người tiêu dùng.
               </p>
+
+              <div className="mt-6 rounded-[22px] border border-white/10 bg-white/5 p-3.5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">
+                  Chứng nhận website
+                </p>
+                <div className="mt-3 flex items-center gap-3">
+                  <img
+                    src={assetUrl("/assets/brand/logo-bct.avif")}
+                    alt="Logo Bộ Công Thương"
+                    loading="lazy"
+                    className="h-12 w-auto rounded-[12px] bg-white p-1.5"
+                  />
+                  <div>
+                    <p className="text-xs font-semibold text-white/82">Đã gắn logo Bộ Công Thương</p>
+                    <p className="mt-1 text-xs leading-5 text-white/62">
+                      Hiển thị ở footer để tăng độ tin cậy khi khách xem landing page trên điện thoại và desktop.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div>

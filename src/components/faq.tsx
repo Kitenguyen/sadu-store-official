@@ -11,7 +11,7 @@ export const FAQS = [
   },
   {
     q: "Thời gian giao hàng là bao lâu?",
-    a: "Đơn nội thành thường giao trong 24 giờ, các tỉnh thành khác từ 2 đến 4 ngày làm việc tuỳ khu vực.",
+    a: "Đơn nội thành thường giao trong 24 giờ, các tỉnh thành khác từ 2 đến 4 ngày làm việc tùy khu vực.",
   },
   {
     q: "Tôi có thể đổi trả sản phẩm không?",
@@ -27,29 +27,34 @@ export function Faq() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section className="mx-auto max-w-[1440px] px-5 py-20 md:px-10 md:py-28">
+    <section className="mx-auto max-w-[1440px] px-5 py-14 md:px-10 md:py-28">
       <div className="mx-auto max-w-2xl">
-        <div className="mb-10 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-[#222222] md:text-4xl">Câu hỏi thường gặp</h2>
+        <div className="mb-7 text-center md:mb-10">
+          <h2 className="text-[1.9rem] font-bold tracking-tight text-[#fff8ef] md:text-4xl">
+            Câu hỏi thường gặp
+          </h2>
         </div>
 
         <div className="space-y-3">
           {FAQS.map((item, i) => {
             const isOpen = open === i;
             return (
-              <div key={item.q} className="overflow-hidden rounded-[20px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+              <div
+                key={item.q}
+                className="overflow-hidden rounded-[24px] border border-white/8 bg-[rgba(255,255,255,0.05)] shadow-[0_18px_45px_-35px_rgba(0,0,0,0.85)]"
+              >
                 <button
                   type="button"
                   onClick={() => setOpen(isOpen ? null : i)}
                   className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
                 >
-                  <span className="text-sm font-semibold text-[#222222] md:text-base">{item.q}</span>
+                  <span className="text-sm font-semibold text-[#fff8ef] md:text-base">{item.q}</span>
                   <svg
                     width="18"
                     height="18"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#1E5B38"
+                    stroke="#D6B36A"
                     strokeWidth="2"
                     className={`shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
                   >
@@ -61,7 +66,7 @@ export function Faq() {
                   style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
                 >
                   <div className="overflow-hidden">
-                    <p className="px-6 pb-5 text-sm leading-relaxed text-[#222222]/65">{item.a}</p>
+                    <p className="px-6 pb-5 text-sm leading-relaxed text-[#f3e1ca]/68">{item.a}</p>
                   </div>
                 </div>
               </div>

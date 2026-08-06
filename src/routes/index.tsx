@@ -11,6 +11,8 @@ import {
   MobilePurchaseBar,
   SupportBubble,
 } from "../components/floating-widgets";
+import { IngredientsSection } from "../components/ingredients-section";
+import { MobileHero } from "../components/mobile-hero";
 import { ProductCategories } from "../components/product-categories";
 import { PromoBanner } from "../components/promo-banner";
 import { Reviews } from "../components/reviews";
@@ -31,6 +33,12 @@ export const Route = createFileRoute("/")({
       {
         rel: "preload",
         as: "image",
+        href: assetUrl("/assets/iloveimg-compressed/img-hero.png"),
+        media: "(max-width: 767px)",
+      },
+      {
+        rel: "preload",
+        as: "image",
         href: assetUrl("/assets/world/scene-01-poster.jpg"),
         media: "(min-width: 861px)",
       },
@@ -38,7 +46,7 @@ export const Route = createFileRoute("/")({
         rel: "preload",
         as: "image",
         href: assetUrl("/assets/world/scene-01-mobile-poster.jpg"),
-        media: "(max-width: 860px)",
+        media: "(min-width: 768px) and (max-width: 860px)",
       },
     ],
   }),
@@ -47,13 +55,13 @@ export const Route = createFileRoute("/")({
 
 const THEME = {
   accent: "#D6B36A",
-  background: "#1E5B38",
-  ink: "#FAF9F5",
-  muted: "rgba(250,249,245,0.7)",
+  background: "#120D09",
+  ink: "#FFF8EF",
+  muted: "rgba(243,225,202,0.72)",
 };
 
 const PAGE_DESCRIPTION =
-  "SADU Store Official mang đến bộ sưu tập Trà Mate, trà thảo dược và combo ưu đãi giao hàng toàn quốc.";
+  "SADU Store Official mang đến bộ sưu tập trà mate, trà thảo dược và các ưu đãi giao hàng toàn quốc.";
 const PRIMARY_IMAGE_URL = new URL(assetUrl("/presets/cover.png"), SITE_ORIGIN).toString();
 const HOMEPAGE_SCHEMA = JSON.stringify([
   {
@@ -123,22 +131,30 @@ const SCENES: ScrollScrubScene[] = [
   {
     id: "source",
     label: "Nguồn cội",
-    kicker: "SADU · Từ núi rừng đến tách trà",
-    title: "Nguồn cội nguyên sơ",
-    body: "Thảo dược mọc tự nhiên trên những sườn đồi cao nguyên, đón nắng sớm và sương mù mỗi ban mai.",
+    kicker: "SADU Store Official",
+    title: "Trà thảo dược Việt Nam dễ chọn, dễ uống và đáng tin cậy mỗi ngày.",
+    body: "Từ xạ đen, lá sen đến hoa cúc, SADU giữ chất mộc sạch trong bộ sưu tập trà tiện pha, ưu đãi rõ ràng và giao hàng toàn quốc.",
+    tags: ["Miễn phí ship từ 250K", "Đổi trả 7 ngày"],
     poster: assetUrl("/assets/world/scene-01-poster.jpg"),
     mobilePoster: assetUrl("/assets/world/scene-01-mobile-poster.jpg"),
     clip: assetUrl("/assets/world/scene-01.mp4"),
     mobileClip: assetUrl("/assets/world/scene-01-mobile.mp4"),
     align: "left",
     scroll: 1.5,
+    actions: (
+      <HeroActions
+        primaryLabel="Xem bộ sưu tập đang bán"
+        secondaryLabel="Xem ưu đãi hôm nay"
+        secondaryHref="#promo-products"
+      />
+    ),
   },
   {
     id: "handpick",
     label: "Hái tay",
     kicker: "Chuẩn VietGAP",
-    title: "Hái bằng tay, chọn từng lá",
-    body: "Người nông dân chọn hái từng lá đạt độ trưởng thành tốt nhất, đúng thời điểm để giữ trọn dưỡng chất.",
+    title: "Nguyên liệu được chọn kỹ từ vùng trồng sạch.",
+    body: "Người làm vườn hái theo lứa, chọn đúng độ lá và giữ sự đồng đều để từng mẻ trà lên nước ổn định, dễ uống và thơm dịu hơn.",
     tags: ["VietGAP", "Hái thủ công"],
     poster: assetUrl("/assets/world/scene-02-poster.jpg"),
     mobilePoster: assetUrl("/assets/world/scene-02-mobile-poster.jpg"),
@@ -151,8 +167,8 @@ const SCENES: ScrollScrubScene[] = [
     id: "dry",
     label: "Sấy khô",
     kicker: "Không chất bảo quản",
-    title: "Sấy tự nhiên, giữ trọn dưỡng chất",
-    body: "Lá thảo dược được phơi và sấy ở nhiệt độ thấp trong nhà xưởng đạt chuẩn, không dùng phụ gia.",
+    title: "Sấy và phối vị để hợp nhịp uống hằng ngày.",
+    body: "Nguyên liệu được làm sạch, sấy ở nhiệt độ phù hợp và phối công thức vừa vị để khách nhìn là hiểu ngay: sạch, tiện dùng và dễ duy trì.",
     tags: ["100% tự nhiên", "Không chất bảo quản"],
     poster: assetUrl("/assets/world/scene-03-poster.jpg"),
     mobilePoster: assetUrl("/assets/world/scene-03-mobile-poster.jpg"),
@@ -165,34 +181,48 @@ const SCENES: ScrollScrubScene[] = [
     id: "cup",
     label: "Tách trà",
     kicker: "SADU",
-    title: "Một tách trà, cả vùng núi rừng",
-    body: "Từ cao nguyên đến tách trà nóng trên bàn bạn, mỗi ngụm là một câu chuyện thảo dược Việt Nam.",
+    title: "Một tách trà sáng vị, trầm sắc và gọn trong trải nghiệm mua.",
+    body: "Phần hero dẫn khách từ cảm xúc thương hiệu sang quyết định mua nhanh hơn, để thấy rõ bộ sưu tập, flash sale và combo đang bán tốt của SADU.",
     poster: assetUrl("/assets/world/scene-04-poster.jpg"),
     mobilePoster: assetUrl("/assets/world/scene-04-mobile-poster.jpg"),
     clip: assetUrl("/assets/world/scene-04.mp4"),
     mobileClip: assetUrl("/assets/world/scene-04-mobile.mp4"),
     align: "left",
     scroll: 1.6,
-    actions: <HeroActions />,
+    actions: (
+      <HeroActions
+        primaryLabel="Khám phá bộ sưu tập"
+        secondaryLabel="Xem câu chuyện nông trại"
+        secondaryHref="#farm-story"
+      />
+    ),
   },
 ];
 
-function HeroActions() {
+function HeroActions({
+  primaryLabel,
+  secondaryLabel,
+  secondaryHref,
+}: {
+  primaryLabel: string;
+  secondaryLabel: string;
+  secondaryHref: string;
+}) {
   return (
     <div className="flex flex-wrap items-center gap-4">
       <a
         href="#categories"
-        className="group relative overflow-hidden rounded-full bg-[#D6B36A] px-7 py-3.5 text-sm font-semibold text-[#1E5B38] transition active:scale-[0.97]"
+        className="group relative inline-flex min-h-12 items-center overflow-hidden rounded-full bg-[#D6B36A] px-7 py-3.5 text-base font-semibold text-[#1E5B38] transition active:scale-[0.97]"
       >
-        <span className="relative z-10">Khám phá bộ sưu tập</span>
+        <span className="relative z-10">{primaryLabel}</span>
         <span className="absolute inset-0 -translate-x-full bg-white/30 transition-transform duration-500 group-hover:translate-x-0" />
       </a>
       <a
-        href="#farm-story"
-        className="group inline-flex items-center gap-2 text-sm font-medium text-white"
+        href={secondaryHref}
+        className="group inline-flex min-h-12 items-center gap-2 text-base font-medium text-white/84"
       >
         <span className="border-b border-white/0 transition-colors group-hover:border-white/70">
-          Xem câu chuyện nông trại
+          {secondaryLabel}
         </span>
         <svg
           width="14"
@@ -212,13 +242,22 @@ function HeroActions() {
 
 function TrustBadgesBar() {
   return (
-    <div className="border-y border-black/6 bg-white/60">
-      <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-center gap-x-10 gap-y-3 px-5 py-4 text-xs font-medium text-[#222222]/60 md:justify-between md:px-10">
-        <span>Chuẩn VietGAP</span>
-        <span>OCOP 4 sao</span>
-        <span>100% tự nhiên</span>
-        <span>Không chất bảo quản</span>
-        <span>Giao hàng toàn quốc</span>
+    <div className="border-y border-[#d6b36a]/10 bg-[#120d09]">
+      <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-center gap-x-4 gap-y-3 px-5 py-4 text-xs font-medium text-[#f3e1ca]/66 md:justify-between md:px-10">
+        {[
+          "Chuẩn VietGAP",
+          "OCOP 4 sao",
+          "100% tự nhiên",
+          "Không chất bảo quản",
+          "Giao hàng toàn quốc",
+        ].map((item) => (
+          <span
+            key={item}
+            className="rounded-full border border-white/8 bg-white/4 px-3 py-1.5"
+          >
+            {item}
+          </span>
+        ))}
       </div>
     </div>
   );
@@ -231,13 +270,19 @@ function Index() {
 
   return (
     <CartProvider>
-      <div id="top" className="min-h-dvh bg-[#FAF9F5]">
+      <div id="top" className="min-h-dvh bg-[#120d09] text-[#FFF8EF]">
         <StructuredData json={HOMEPAGE_SCHEMA} />
         <SiteNav />
         <main id="main-content">
-          <ScrollScrub scenes={SCENES} theme={THEME} />
+          <div className="md:hidden">
+            <MobileHero />
+          </div>
+          <div className="hidden md:block">
+            <ScrollScrub scenes={SCENES} theme={THEME} />
+          </div>
           <TrustBadgesBar />
           <div className="relative">
+            <IngredientsSection />
             <SongLanhJourney />
             <PromoBanner />
             <Certifications />

@@ -14,7 +14,7 @@ function two(n: number) {
 
 function TimerBox({ label, value }: { label: string; value: number }) {
   return (
-    <div className="min-w-[58px] rounded-2xl bg-white/10 px-3 py-2 text-center">
+    <div className="min-w-[58px] rounded-2xl border border-white/8 bg-black/16 px-3 py-2 text-center">
       <div className="text-base font-bold tracking-[0.16em] text-white">{two(value)}</div>
       <div className="mt-1 text-[10px] uppercase tracking-[0.2em] text-white/55">{label}</div>
     </div>
@@ -31,20 +31,23 @@ export function PromoBanner() {
   }, [target]);
 
   return (
-    <div className="relative overflow-hidden bg-[#1E5B38] py-4 text-[#FAF9F5]">
+    <div className="relative overflow-hidden bg-[linear-gradient(135deg,#1b130f,#251912_55%,#342319)] py-4 text-[#FAF9F5]">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d6b36a]/50 to-transparent" />
       <div className="mx-auto flex max-w-[1440px] flex-col gap-5 px-5 md:px-10">
         <div className="flex flex-col items-center justify-center gap-2 text-center text-sm font-medium sm:flex-row sm:flex-wrap sm:gap-5">
-          <span>🚚 Miễn phí vận chuyển cho đơn hàng từ 250.000đ</span>
-          <span>🎁 Đơn đầu tiên nhận Voucher 5.000đ</span>
+          <span>Miễn phí vận chuyển cho đơn hàng từ 250.000đ</span>
+          <span>Đơn đầu tiên nhận voucher 5.000đ</span>
         </div>
 
-        <div className="flex flex-col items-center justify-between gap-4 rounded-[24px] border border-white/10 bg-white/6 px-5 py-5 text-center md:flex-row md:text-left">
+        <div className="flex flex-col items-center justify-between gap-4 rounded-[28px] border border-[#d6b36a]/14 bg-[linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.02))] px-5 py-5 text-center shadow-[0_35px_65px_-40px_rgba(0,0,0,0.8)] md:flex-row md:text-left">
           <div>
-            <div className="mb-3 inline-flex items-center rounded-full bg-[#D6B36A] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-[#1E5B38]">
+            <div className="mb-3 inline-flex items-center rounded-full bg-[#D6B36A] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-[#1E1A14]">
               Flash Sale
             </div>
             <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Today Only</h2>
-            <p className="mt-2 text-sm text-white/70">Save up to 30% cho các dòng trà túi lọc và combo khuyến mại.</p>
+            <p className="mt-2 text-sm text-white/70">
+              Save up to 30% cho các dòng trà túi lọc và combo khuyến mại.
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-2">
@@ -59,7 +62,7 @@ export function PromoBanner() {
               const el = document.getElementById("promo-products");
               el?.scrollIntoView({ behavior: "smooth" });
             }}
-            className="whitespace-nowrap rounded-full bg-[#D6B36A] px-5 py-3 text-sm font-semibold text-[#222222] transition hover:brightness-105 active:scale-[0.97]"
+            className="whitespace-nowrap rounded-full bg-[#D6B36A] px-5 py-3 text-sm font-semibold text-[#1E1A14] transition hover:brightness-105 active:scale-[0.97]"
           >
             Xem ưu đãi ngay
           </button>

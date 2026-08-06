@@ -849,28 +849,65 @@ export function MobilePurchaseBar() {
 export function CouponWidget() {
   const [visible, setVisible] = useState(false);
   const [claimed, setClaimed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const syncVoucher = () => {
       const dismissed = window.localStorage.getItem("sadu-coupon-dismissed");
       const hasClaimed = window.localStorage.getItem(VOUCHER_STORAGE_KEY) === "1";
-      if (!dismissed) {
-        setVisible(true);
-      }
+      setIsMobile(window.matchMedia("(max-width: 767px)").matches);
+      setVisible(!dismissed);
       setClaimed(hasClaimed);
     };
 
-    syncVoucher();
+    const timer = window.setTimeout(syncVoucher, window.matchMedia("(max-width: 767px)").matches ? 9000 : 0);
     window.addEventListener(VOUCHER_UNLOCK_EVENT, syncVoucher);
     window.addEventListener("storage", syncVoucher);
+    window.addEventListener("resize", syncVoucher);
 
     return () => {
+      window.clearTimeout(timer);
       window.removeEventListener(VOUCHER_UNLOCK_EVENT, syncVoucher);
       window.removeEventListener("storage", syncVoucher);
+      window.removeEventListener("resize", syncVoucher);
     };
   }, []);
 
   if (!visible) return null;
+
+  if (isMobile) {
+    return (
+      <div className="fixed bottom-[5.75rem] left-4 z-40 flex items-center gap-2 md:hidden">
+        <button
+          type="button"
+          onClick={async () => {
+            await navigator.clipboard.writeText(VOUCHER_CODE);
+            unlockVoucher();
+            setClaimed(true);
+          }}
+          className="rounded-full border border-[#D6B36A]/35 bg-[rgba(16,12,10,0.88)] px-4 py-3 text-left shadow-[0_18px_45px_-24px_rgba(0,0,0,0.45)] backdrop-blur-md"
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#D6B36A]">
+            Voucher ưu đãi
+          </p>
+          <p className="mt-1 text-sm font-bold text-[#fff8ef]">
+            {claimed ? "Đã lấy mã SONGLANH" : `Lấy mã giảm ${formatVnd(VOUCHER_DISCOUNT)}`}
+          </p>
+        </button>
+        <button
+          type="button"
+          aria-label="Đóng voucher"
+          onClick={() => {
+            window.localStorage.setItem("sadu-coupon-dismissed", "1");
+            setVisible(false);
+          }}
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-[rgba(16,12,10,0.88)] text-sm text-white/72 shadow-[0_18px_45px_-24px_rgba(0,0,0,0.45)] backdrop-blur-md"
+        >
+          ✕
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed bottom-24 left-5 z-40 w-[250px] overflow-hidden rounded-[28px] border border-[#D6B36A]/35 bg-white shadow-[0_20px_50px_-24px_rgba(0,0,0,0.35)] md:bottom-8">

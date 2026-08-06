@@ -2,19 +2,18 @@ import { categories } from "../lib/products";
 
 export function ProductCategories() {
   return (
-    <section id="categories" className="mx-auto max-w-[1440px] px-5 py-20 md:px-10 md:py-28">
-      <div className="mb-10 flex items-end justify-between gap-6">
+    <section id="categories" className="mx-auto max-w-[1440px] px-5 py-14 md:px-10 md:py-28">
+      <div className="mb-7 flex items-end justify-between gap-6 md:mb-10">
         <div>
           <p className="mb-3 font-mono text-xs font-medium uppercase tracking-[0.16em] text-[#D6B36A]">
             Danh mục
           </p>
-          <h2 className="max-w-md text-3xl font-bold tracking-tight text-[#222222] md:text-4xl">
+          <h2 className="max-w-md text-[1.9rem] font-bold tracking-tight text-[#fff8ef] md:text-4xl">
             Chọn đúng nhóm sản phẩm đang ưu đãi
           </h2>
         </div>
-        <p className="hidden max-w-xs text-sm leading-relaxed text-[#222222]/60 md:block">
-          SADU MATE kết hợp xạ đen, lá sen và hoa cúc trong công thức thanh nhẹ, tiện pha và phù hợp với người muốn
-          bắt đầu một thói quen tốt đơn giản, sạch.
+        <p className="hidden max-w-xs text-sm leading-relaxed text-[#f3e1ca]/62 md:block">
+          SADU MATE kết hợp xạ đen, lá sen và hoa cúc trong công thức thanh nhẹ, tiện pha và phù hợp với người muốn bắt đầu một thói quen tốt đơn giản, sạch.
         </p>
       </div>
 
@@ -31,7 +30,7 @@ export function ProductCategories() {
               className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-700 ease-out group-hover:scale-110"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/18 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-5">
               <p className="text-xs text-white/70">{cat.count} sản phẩm</p>
               <h3 className="mt-1 text-lg font-semibold text-white">{cat.name}</h3>

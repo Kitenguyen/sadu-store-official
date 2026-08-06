@@ -165,7 +165,7 @@
 
 .scroll-scrub__copy {
   position: relative;
-  width: min(34rem, 46vw);
+  width: min(32rem, 44vw);
   pointer-events: auto;
 }
 
@@ -181,23 +181,23 @@
 }
 
 .scroll-scrub__title {
-  max-width: 13ch;
+  max-width: 12ch;
   margin: 0;
   color: #ffffff;
   font-family: var(--font-sans);
-  font-size: clamp(2.5rem, 5.2vw, 5.25rem);
+  font-size: clamp(3rem, 3.8vw, 3.5rem);
   font-weight: 700;
-  line-height: 0.98;
+  line-height: 1.05;
   letter-spacing: -0.03em;
   text-wrap: balance;
 }
 
 .scroll-scrub__body {
-  max-width: 38ch;
-  margin: 1.35rem 0 0;
+  max-width: 34ch;
+  margin: 1.1rem 0 0;
   color: rgba(255, 255, 255, 0.86);
-  font-size: clamp(1rem, 1.2vw, 1.15rem);
-  line-height: 1.6;
+  font-size: clamp(1rem, 1.05vw, 1.0625rem);
+  line-height: 1.58;
 }
 
 .scroll-scrub__tags {
@@ -222,7 +222,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.85rem;
-  margin-top: 2.1rem;
+  margin-top: 1.6rem;
 }
 
 @media (max-width: 860px) {
@@ -258,8 +258,14 @@
   }
 
   .scroll-scrub__title {
-    max-width: 14ch;
-    font-size: clamp(2.1rem, 10vw, 3.75rem);
+    max-width: 11ch;
+    font-size: clamp(2.4rem, 7vw, 3rem);
+    line-height: 1.08;
+  }
+
+  .scroll-scrub__body {
+    font-size: 1rem;
+    line-height: 1.56;
   }
 }
 
