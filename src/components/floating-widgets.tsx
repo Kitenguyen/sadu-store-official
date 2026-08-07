@@ -762,7 +762,7 @@ export function SupportBubble() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-24 right-5 z-40 md:bottom-8">
+    <div className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-4 z-40 md:bottom-8 md:right-5">
       {open ? (
         <div className="mb-3 w-72 rounded-[24px] bg-white p-4 text-sm shadow-xl">
           <p className="font-semibold text-[#222222]">Liên hệ SADU thật nhanh</p>
@@ -814,19 +814,53 @@ export function SupportBubble() {
 export function MobilePurchaseBar() {
   const { count, subtotal, openCart } = useCart();
   const hasItems = count > 0;
+  const [afterHero, setAfterHero] = useState(false);
+  const [inProducts, setInProducts] = useState(false);
+
+  useEffect(() => {
+    const updateBarState = () => {
+      const hero = document.querySelector("main .md\\:hidden section");
+      const products = document.getElementById("products");
+      const viewportHeight = window.innerHeight;
+
+      if (hero) {
+        const heroBottom = hero.getBoundingClientRect().bottom;
+        setAfterHero(heroBottom <= 88);
+      }
+
+      if (products) {
+        const rect = products.getBoundingClientRect();
+        setInProducts(rect.top <= viewportHeight * 0.35 && rect.bottom >= 140);
+      }
+    };
+
+    updateBarState();
+    window.addEventListener("scroll", updateBarState, { passive: true });
+    window.addEventListener("resize", updateBarState);
+
+    return () => {
+      window.removeEventListener("scroll", updateBarState);
+      window.removeEventListener("resize", updateBarState);
+    };
+  }, []);
+
+  if (!afterHero) return null;
+
+  const ctaLabel = hasItems ? "Xem giỏ" : inProducts ? "Mua ngay" : "Xem Trà Mate";
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-black/8 bg-[#FAF9F5]/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-lg md:hidden">
-      <div className="flex items-center justify-between gap-4">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-black/8 bg-[#FAF9F5]/95 px-4 pb-[calc(0.9rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-lg md:hidden">
+      <div className="flex min-h-[64px] items-center justify-between gap-4">
         <div>
-          <p className="text-[11px] text-[#222222]/50">
-            {hasItems ? `${count} sản phẩm` : "Ưu đãi đang mở"}
-          </p>
+          <p className="text-[11px] font-medium text-[#222222]/50">Ưu đãi đang mở</p>
           <p className="text-base font-bold text-[#1E5B38]">
-            {hasItems
-              ? formatVnd(subtotal)
-              : `Mã ${VOUCHER_CODE} giảm ${formatVnd(VOUCHER_DISCOUNT)}`}
+            {`Mã ${VOUCHER_CODE} giảm ${formatVnd(VOUCHER_DISCOUNT)}`}
           </p>
+          {hasItems ? (
+            <p className="mt-0.5 text-[11px] text-[#222222]/55">
+              {count} sản phẩm · {formatVnd(subtotal)}
+            </p>
+          ) : null}
         </div>
         <button
           type="button"
@@ -835,11 +869,20 @@ export function MobilePurchaseBar() {
               openCart();
               return;
             }
-            scrollToSection("categories");
+
+            if (inProducts) {
+              const primaryCta = document.querySelector<HTMLButtonElement>(
+                "[data-product-primary-cta='true']",
+              );
+              primaryCta?.click();
+              return;
+            }
+
+            scrollToSection("mate-collection");
           }}
-          className="flex-1 max-w-[220px] rounded-full bg-[#1E5B38] py-3.5 text-sm font-semibold text-white transition active:scale-[0.97]"
+          className="flex-1 rounded-full bg-[#1E5B38] px-4 py-3.5 text-base font-semibold text-white transition active:scale-[0.97]"
         >
-          {hasItems ? "Xem giỏ hàng" : "Xem sản phẩm"}
+          {ctaLabel}
         </button>
       </div>
     </div>
@@ -876,37 +919,7 @@ export function CouponWidget() {
   if (!visible) return null;
 
   if (isMobile) {
-    return (
-      <div className="fixed bottom-[5.75rem] left-4 z-40 flex items-center gap-2 md:hidden">
-        <button
-          type="button"
-          onClick={async () => {
-            await navigator.clipboard.writeText(VOUCHER_CODE);
-            unlockVoucher();
-            setClaimed(true);
-          }}
-          className="rounded-full border border-[#D6B36A]/35 bg-[rgba(16,12,10,0.88)] px-4 py-3 text-left shadow-[0_18px_45px_-24px_rgba(0,0,0,0.45)] backdrop-blur-md"
-        >
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#D6B36A]">
-            Voucher ưu đãi
-          </p>
-          <p className="mt-1 text-sm font-bold text-[#fff8ef]">
-            {claimed ? "Đã lấy mã SONGLANH" : `Lấy mã giảm ${formatVnd(VOUCHER_DISCOUNT)}`}
-          </p>
-        </button>
-        <button
-          type="button"
-          aria-label="Đóng voucher"
-          onClick={() => {
-            window.localStorage.setItem("sadu-coupon-dismissed", "1");
-            setVisible(false);
-          }}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-[rgba(16,12,10,0.88)] text-sm text-white/72 shadow-[0_18px_45px_-24px_rgba(0,0,0,0.45)] backdrop-blur-md"
-        >
-          ✕
-        </button>
-      </div>
-    );
+    return null;
   }
 
   return (

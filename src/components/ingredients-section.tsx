@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { assetUrl } from "../lib/site";
 import { ExpandableText } from "./expandable-text";
 
@@ -45,10 +46,13 @@ const INGREDIENTS = [
 ];
 
 export function IngredientsSection() {
+  const [showAll, setShowAll] = useState(false);
+  const visibleIngredients = showAll ? INGREDIENTS : INGREDIENTS.slice(0, 4);
+
   return (
     <section
       id="ingredients"
-      className="relative overflow-hidden bg-[linear-gradient(180deg,#18110d_0%,#120d09_100%)] py-14 md:py-28"
+      className="relative scroll-mt-24 overflow-hidden bg-[linear-gradient(180deg,#18110d_0%,#120d09_100%)] py-14 md:py-28"
     >
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d6b36a]/45 to-transparent" />
       <div className="absolute left-1/2 top-0 h-72 w-72 -translate-x-1/2 rounded-full bg-[#d6b36a]/10 blur-[120px]" />
@@ -106,7 +110,7 @@ export function IngredientsSection() {
         </div>
 
         <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-5">
-          {INGREDIENTS.map((item) => (
+          {visibleIngredients.map((item) => (
             <article
               key={item.image}
               className="group overflow-hidden rounded-[24px] border border-white/8 bg-[rgba(255,255,255,0.03)] shadow-[0_25px_60px_-40px_rgba(0,0,0,0.8)]"
@@ -128,6 +132,18 @@ export function IngredientsSection() {
             </article>
           ))}
         </div>
+
+        {INGREDIENTS.length > 4 ? (
+          <div className="mt-4 flex justify-center md:hidden">
+            <button
+              type="button"
+              onClick={() => setShowAll((value) => !value)}
+              className="rounded-full border border-[#d6b36a]/28 bg-[#d6b36a]/8 px-4 py-2.5 text-sm font-semibold text-[#f0d5ae]"
+            >
+              {showAll ? "Thu gọn nguyên liệu" : "Xem thêm nguyên liệu"}
+            </button>
+          </div>
+        ) : null}
       </div>
     </section>
   );

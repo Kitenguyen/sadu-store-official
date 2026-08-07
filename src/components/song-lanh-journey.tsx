@@ -22,6 +22,14 @@ const SLOT_POOL = [
   { id: "slot-12", top: 92, left: 72, rotate: 10 },
 ] as const;
 
+const SLOT_GROUPS = [
+  ["slot-1", "slot-2"],
+  ["slot-3", "slot-4"],
+  ["slot-5", "slot-6"],
+  ["slot-7", "slot-8"],
+  ["slot-9", "slot-10", "slot-11", "slot-12"],
+] as const;
+
 const JOURNEY_CARDS = [
   {
     id: "quote-1",
@@ -34,7 +42,7 @@ const JOURNEY_CARDS = [
   {
     id: "quote-2",
     quote: "Trà đạo chỉ đơn giản là đun nước, pha trà và uống trà.",
-    author: "Sen no Rikyū",
+    author: "Sen no Rikyu",
     leSong:
       "Cuộc sống vốn không phức tạp. Chính lòng tham, sự so sánh và kỳ vọng khiến nó trở nên nặng nề.",
     baiHoc: "Điều vĩ đại thường nằm trong những việc rất bình thường.",
@@ -42,7 +50,7 @@ const JOURNEY_CARDS = [
   {
     id: "quote-3",
     quote: "Trà là một tôn giáo của nghệ thuật sống.",
-    author: "Kakuzō Okakura",
+    author: "Kakuzo Okakura",
     leSong:
       "Sống không phải chỉ để tồn tại. Mỗi bữa ăn, mỗi chén trà, mỗi cuộc trò chuyện đều có thể trở thành một tác phẩm nếu ta đủ trân trọng.",
     baiHoc: "Chất lượng cuộc sống phụ thuộc vào cách ta cảm nhận nó.",
@@ -108,6 +116,25 @@ const JOURNEY_CARDS = [
 type JourneyCard = (typeof JOURNEY_CARDS)[number];
 type JourneyCardId = JourneyCard["id"];
 type JourneySlotId = (typeof SLOT_POOL)[number]["id"];
+
+const MOBILE_SLOT_MAP = new Map<
+  JourneySlotId,
+  { top: number; left: number; rotate: number }
+>([
+  ["slot-1", { top: 1.6, left: 18, rotate: -12 }],
+  ["slot-2", { top: 4.8, left: 80, rotate: 14 }],
+  ["slot-3", { top: 11, left: 24, rotate: -10 }],
+  ["slot-4", { top: 17, left: 78, rotate: 11 }],
+  ["slot-5", { top: 28, left: 18, rotate: -16 }],
+  ["slot-6", { top: 39, left: 82, rotate: 9 }],
+  ["slot-7", { top: 52, left: 25, rotate: -12 }],
+  ["slot-8", { top: 63, left: 75, rotate: 15 }],
+  ["slot-9", { top: 74, left: 16, rotate: -8 }],
+  ["slot-10", { top: 84, left: 80, rotate: 13 }],
+  ["slot-11", { top: 92, left: 28, rotate: -15 }],
+  ["slot-12", { top: 97, left: 70, rotate: 10 }],
+]);
+
 type JourneyLeaf = {
   id: string;
   slotId: JourneySlotId;
@@ -130,6 +157,14 @@ type FlyingLeafState = {
   active: boolean;
 };
 
+function getSafeStorage(): Storage | null {
+  if (typeof window === "undefined" || typeof window.localStorage === "undefined") {
+    return null;
+  }
+
+  return window.localStorage;
+}
+
 function shuffle<T>(items: readonly T[]): T[] {
   const copy = [...items];
   for (let i = copy.length - 1; i > 0; i -= 1) {
@@ -139,9 +174,18 @@ function shuffle<T>(items: readonly T[]): T[] {
   return copy;
 }
 
+function sampleOne<T>(items: readonly T[]): T {
+  return items[Math.floor(Math.random() * items.length)] as T;
+}
+
 function createJourneyState(): JourneyState {
   const cards = shuffle(JOURNEY_CARDS).slice(0, 5);
-  const slots = shuffle(SLOT_POOL).slice(0, 5);
+  const slots = shuffle(
+    SLOT_GROUPS.map((group) => {
+      const slotId = sampleOne(group);
+      return SLOT_POOL.find((slot) => slot.id === slotId)!;
+    }),
+  );
   const fragments = shuffle(FRAGMENTS);
 
   return {
@@ -158,10 +202,11 @@ function createJourneyState(): JourneyState {
 }
 
 function readJourneyState(): JourneyState | null {
-  if (typeof window === "undefined") return null;
+  const storage = getSafeStorage();
+  if (!storage) return null;
 
   try {
-    const raw = window.localStorage.getItem(JOURNEY_STORAGE_KEY);
+    const raw = storage.getItem(JOURNEY_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as JourneyState;
     if (!Array.isArray(parsed.leaves) || !Array.isArray(parsed.openedLeafIds)) return null;
@@ -175,7 +220,14 @@ function TeaLeafIcon({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
       <defs>
-        <linearGradient id="tea-leaf-gradient" x1="12" y1="6" x2="50" y2="58" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="tea-leaf-gradient"
+          x1="12"
+          y1="6"
+          x2="50"
+          y2="58"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#A8D48A" />
           <stop offset="0.45" stopColor="#3E8D4D" />
           <stop offset="1" stopColor="#1E5B38" />
@@ -184,6 +236,12 @@ function TeaLeafIcon({ className = "" }: { className?: string }) {
       <path
         d="M52 11C39 11 24 16 16 27c-9 12-8 28-8 28s16 1 28-8c11-8 16-23 16-36Z"
         fill="url(#tea-leaf-gradient)"
+      />
+      <path
+        d="M52 11C39 11 24 16 16 27c-9 12-8 28-8 28s16 1 28-8c11-8 16-23 16-36Z"
+        stroke="rgba(250,249,245,0.42)"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
       />
       <path
         d="M17 47c6-9 15-17 28-26"
@@ -198,6 +256,60 @@ function TeaLeafIcon({ className = "" }: { className?: string }) {
         strokeLinecap="round"
       />
     </svg>
+  );
+}
+
+function JourneyLeaves({
+  journey,
+  slotMap,
+  handleLeafClick,
+  mobile,
+}: {
+  journey: JourneyState;
+  slotMap: Map<JourneySlotId, (typeof SLOT_POOL)[number]>;
+  handleLeafClick: (leaf: JourneyLeaf, element: HTMLButtonElement) => void;
+  mobile?: boolean;
+}) {
+  return (
+    <>
+      {journey.leaves.map((leaf, index) => {
+        if (journey.openedLeafIds.includes(leaf.id)) return null;
+        const slot = mobile ? MOBILE_SLOT_MAP.get(leaf.slotId) : slotMap.get(leaf.slotId);
+        if (!slot) return null;
+        const mobileLeafButtonClass = mobile
+          ? "h-16 w-16 rounded-full border-2 border-[#f6e8bf]/80 ring-1 ring-white/18 bg-[radial-gradient(circle,rgba(246,232,191,0.34),rgba(214,179,106,0.18)_55%,rgba(30,91,56,0.18)_100%)] shadow-[0_20px_36px_-14px_rgba(0,0,0,0.62)]"
+          : "";
+
+        return (
+          <button
+            key={leaf.id}
+            type="button"
+            onClick={(event) => handleLeafClick(leaf, event.currentTarget)}
+            className={`song-lanh-leaf pointer-events-auto absolute isolate flex items-center justify-center transition duration-500 ease-out hover:scale-110 ${mobileLeafButtonClass}`}
+            style={{
+              top: `${slot.top}%`,
+              left: `${slot.left}%`,
+              transform: `translate(-50%, -50%) rotate(${slot.rotate}deg)`,
+              animationDelay: `${index * 0.35}s`,
+            }}
+            aria-label={`Mở lá trà ${leaf.fragmentIndex}`}
+          >
+            <TeaLeafIcon
+              className={
+                mobile
+                  ? "relative z-10 h-14 w-14 brightness-[1.35] saturate-[1.9] contrast-[1.3] drop-shadow-[0_18px_28px_rgba(30,91,56,0.56)]"
+                  : "h-12 w-12 drop-shadow-[0_16px_24px_rgba(30,91,56,0.2)] md:h-16 md:w-16"
+              }
+            />
+            <span
+              className={`absolute inset-0 rounded-full ${
+                mobile ? "z-0 bg-[#f6de96]/28 blur-[12px]" : "bg-white/18 blur-xl"
+              }`}
+            />
+          </button>
+        );
+      })}
+    </>
   );
 }
 
@@ -216,33 +328,27 @@ export function SongLanhJourney() {
     const nextState = stored ?? createJourneyState();
     setJourney(nextState);
     if (nextState.unlocked) {
-      window.localStorage.setItem(VOUCHER_STORAGE_KEY, "1");
+      getSafeStorage()?.setItem(VOUCHER_STORAGE_KEY, "1");
     }
     persistRef.current = true;
   }, []);
 
   useEffect(() => {
     if (!mounted || !journey || !persistRef.current) return;
-    window.localStorage.setItem(JOURNEY_STORAGE_KEY, JSON.stringify(journey));
+    getSafeStorage()?.setItem(JOURNEY_STORAGE_KEY, JSON.stringify(journey));
   }, [journey, mounted]);
 
   const openedCount = journey?.openedLeafIds.length ?? 0;
   const isUnlocked = journey?.unlocked ?? false;
 
-  const cardMap = useMemo(
-    () => new Map(JOURNEY_CARDS.map((card) => [card.id, card])),
-    [],
-  );
-  const slotMap = useMemo(
-    () => new Map(SLOT_POOL.map((slot) => [slot.id, slot])),
-    [],
-  );
+  const cardMap = useMemo(() => new Map(JOURNEY_CARDS.map((card) => [card.id, card])), []);
+  const slotMap = useMemo(() => new Map(SLOT_POOL.map((slot) => [slot.id, slot])), []);
 
   const activeLeaf = journey?.leaves.find((leaf) => leaf.id === activeLeafId) ?? null;
   const activeCard = activeLeaf ? cardMap.get(activeLeaf.cardId) ?? null : null;
 
   const unlockVoucher = () => {
-    window.localStorage.setItem(VOUCHER_STORAGE_KEY, "1");
+    getSafeStorage()?.setItem(VOUCHER_STORAGE_KEY, "1");
     window.dispatchEvent(new Event(VOUCHER_UNLOCK_EVENT));
   };
 
@@ -325,42 +431,46 @@ export function SongLanhJourney() {
 
   return (
     <>
-      <div className="pointer-events-none absolute inset-0 z-20">
-        {journey.leaves.map((leaf, index) => {
-          if (journey.openedLeafIds.includes(leaf.id)) return null;
-          const slot = slotMap.get(leaf.slotId);
-          if (!slot) return null;
-
-          return (
-            <button
-              key={leaf.id}
-              type="button"
-              onClick={(event) => handleLeafClick(leaf, event.currentTarget)}
-              className="song-lanh-leaf pointer-events-auto absolute transition duration-500 ease-out hover:scale-110"
-              style={{
-                top: `${slot.top}%`,
-                left: `${slot.left}%`,
-                transform: `translate(-50%, -50%) rotate(${slot.rotate}deg)`,
-                animationDelay: `${index * 0.35}s`,
-              }}
-              aria-label={`Mở lá trà ${leaf.fragmentIndex}`}
-            >
-              <TeaLeafIcon className="h-12 w-12 drop-shadow-[0_16px_24px_rgba(30,91,56,0.2)] md:h-16 md:w-16" />
-              <span className="absolute inset-0 rounded-full bg-white/18 blur-xl" />
-            </button>
-          );
-        })}
+      <div className="pointer-events-none absolute inset-0 z-20 hidden md:block">
+        <JourneyLeaves journey={journey} slotMap={slotMap} handleLeafClick={handleLeafClick} />
       </div>
 
-      <div className="fixed right-4 top-[38%] z-40">
+      <div className="pointer-events-none absolute inset-0 z-20 md:hidden">
+        <JourneyLeaves
+          journey={journey}
+          slotMap={slotMap}
+          handleLeafClick={handleLeafClick}
+          mobile
+        />
+      </div>
+
+      <div className="fixed right-4 top-[38%] z-40 hidden md:block">
         <button
           type="button"
           onClick={() => {
-            if (isUnlocked) setShowCompletion(true);
+            if (isUnlocked) {
+              setShowCompletion(true);
+            }
           }}
           className="rounded-full border border-white/70 bg-white/88 px-4 py-3 text-sm font-semibold text-[#1E5B38] shadow-[0_20px_45px_-22px_rgba(0,0,0,0.45)] backdrop-blur-md transition hover:-translate-y-0.5"
         >
-          🍃 {openedCount}/5
+          0/5 {openedCount ? `(${openedCount})` : ""}
+        </button>
+      </div>
+
+      <div className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] left-4 z-40 md:hidden">
+        <button
+          type="button"
+          onClick={() => {
+            if (isUnlocked) {
+              setShowCompletion(true);
+              return;
+            }
+            toast.message("Chạm vào các lá trà đang nổi để mở mảnh ghép.");
+          }}
+          className="rounded-full border border-white/18 bg-[rgba(30,91,56,0.9)] px-4 py-3 text-sm font-semibold text-white shadow-[0_18px_45px_-24px_rgba(0,0,0,0.45)] backdrop-blur-md"
+        >
+          Sống Lành {openedCount}/5
         </button>
       </div>
 
@@ -401,34 +511,46 @@ export function SongLanhJourney() {
               </div>
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#D6B36A]">
-                  Hành Trình Song Lành
+                  Hành Trình Sống Lành
                 </p>
-                <p className="text-sm text-[#1E5B38]/65">Mỗi lá là một khoảng lặng đẹp giữa hành trình mua trà.</p>
+                <p className="text-sm text-[#1E5B38]/65">
+                  Mỗi lá là một khoảng lặng đẹp giữa hành trình mua trà.
+                </p>
               </div>
             </div>
 
             <blockquote className="text-2xl font-semibold leading-tight tracking-tight text-[#1E5B38] md:text-3xl">
-              “{activeCard.quote}”
+              "{activeCard.quote}"
             </blockquote>
 
             {activeCard.author ? (
-              <p className="mt-3 text-sm font-medium text-[#222222]/55">— {activeCard.author}</p>
+              <p className="mt-3 text-sm font-medium text-[#222222]/55">- {activeCard.author}</p>
             ) : null}
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <section className="rounded-[24px] border border-[#1E5B38]/8 bg-white/80 p-4">
-                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#1E5B38]/55">Lẽ sống</p>
-                <p className="mt-2 text-sm leading-relaxed text-[#222222]/72">{activeCard.leSong}</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#1E5B38]/55">
+                  Lẽ sống
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-[#222222]/72">
+                  {activeCard.leSong}
+                </p>
               </section>
               <section className="rounded-[24px] border border-[#D6B36A]/18 bg-[#fffbf4] p-4">
-                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#b47a20]">Bài học</p>
-                <p className="mt-2 text-sm leading-relaxed text-[#6f4f14]">{activeCard.baiHoc}</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#b47a20]">
+                  Bài học
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-[#6f4f14]">
+                  {activeCard.baiHoc}
+                </p>
               </section>
             </div>
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-[24px] bg-[#1E5B38] px-4 py-4 text-white">
               <div>
-                <p className="text-xs uppercase tracking-[0.16em] text-white/65">Mảnh ghép nhận được</p>
+                <p className="text-xs uppercase tracking-[0.16em] text-white/65">
+                  Mảnh ghép nhận được
+                </p>
                 <p className="mt-1 text-2xl font-bold tracking-[0.28em]">{activeLeaf.fragment}</p>
               </div>
               <button
@@ -485,17 +607,19 @@ export function SongLanhJourney() {
 
           <div className="relative w-full max-w-xl overflow-hidden rounded-[36px] border border-white/40 bg-[linear-gradient(160deg,rgba(250,249,245,0.98),rgba(244,242,235,0.96))] p-7 shadow-[0_50px_130px_-40px_rgba(0,0,0,0.55)] md:p-9">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#D6B36A]/35 bg-[#fff7e8] px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#b47a20]">
-              🍃 Hành Trình Song Lành
+              Hành Trình Sống Lành
             </div>
             <h3 className="text-3xl font-bold tracking-tight text-[#1E5B38] md:text-4xl">
-              Bạn đã hoàn thành Hành Trình Song Lành
+              Bạn đã hoàn thành Hành Trình Sống Lành
             </h3>
             <p className="mt-3 text-sm leading-relaxed text-[#222222]/68">
               Toàn bộ 5 mảnh ghép đã ghép thành mã ưu đãi dành riêng cho khách đang ở lại hành trình cùng SADU.
             </p>
 
             <div className="mt-6 rounded-[28px] border border-[#1E5B38]/10 bg-white/85 p-5 text-center shadow-sm">
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#1E5B38]/55">Mã voucher</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#1E5B38]/55">
+                Mã voucher
+              </p>
               <p className="mt-2 text-4xl font-black tracking-[0.4em] text-[#1E5B38]">SONGLANH</p>
               <p className="mt-3 text-base font-semibold text-[#b5502f]">Giảm 5.000đ</p>
             </div>
@@ -592,6 +716,7 @@ export function SongLanhJourney() {
             transform: translate3d(30px, 108vh, 0) rotate(220deg);
           }
         }
+
         @media (prefers-reduced-motion: reduce) {
           .song-lanh-leaf,
           .song-lanh-card,

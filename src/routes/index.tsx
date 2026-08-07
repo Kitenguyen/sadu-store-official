@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { Certifications } from "../components/certifications";
 import { FAQS, Faq } from "../components/faq";
@@ -263,9 +263,66 @@ function TrustBadgesBar() {
   );
 }
 
+function DesktopSections() {
+  return (
+    <>
+      <TrustBadgesBar />
+      <div className="relative">
+        <IngredientsSection />
+        <SongLanhJourney />
+        <PromoBanner />
+        <Certifications />
+        <ProductCategories />
+        <FeaturedProducts />
+        <WhyChooseUs />
+        <FarmStory />
+        <Reviews />
+        <Faq />
+        <SiteFooter />
+      </div>
+    </>
+  );
+}
+
+function MobileSections() {
+  return (
+    <div className="relative">
+      <SongLanhJourney />
+      <FeaturedProducts />
+      <TrustBadgesBar />
+      <IngredientsSection />
+      <Certifications />
+      <ProductCategories />
+      <WhyChooseUs />
+      <FarmStory />
+      <Reviews />
+      <Faq />
+      <SiteFooter />
+    </div>
+  );
+}
+
 function Index() {
+  const [isMobileLayout, setIsMobileLayout] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(max-width: 767px)").matches : false,
+  );
+
   useEffect(() => {
     trackViewContent();
+  }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsMobileLayout(media.matches);
+
+    sync();
+    if (typeof media.addEventListener === "function") {
+      media.addEventListener("change", sync);
+      return () => media.removeEventListener("change", sync);
+    }
+
+    media.addListener(sync);
+    return () => media.removeListener(sync);
   }, []);
 
   return (
@@ -280,20 +337,7 @@ function Index() {
           <div className="hidden md:block">
             <ScrollScrub scenes={SCENES} theme={THEME} />
           </div>
-          <TrustBadgesBar />
-          <div className="relative">
-            <IngredientsSection />
-            <SongLanhJourney />
-            <PromoBanner />
-            <Certifications />
-            <ProductCategories />
-            <FeaturedProducts />
-            <WhyChooseUs />
-            <FarmStory />
-            <Reviews />
-            <Faq />
-            <SiteFooter />
-          </div>
+          {isMobileLayout ? <MobileSections /> : <DesktopSections />}
         </main>
         <CartDrawer />
         <CouponWidget />

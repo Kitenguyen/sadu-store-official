@@ -28,7 +28,10 @@ function SectionHeader({
 
 export function FeaturedProducts() {
   return (
-    <section id="products" className="relative overflow-hidden bg-[linear-gradient(180deg,#120d09,#18110d)] py-14 md:py-28">
+    <section
+      id="products"
+      className="relative scroll-mt-24 overflow-hidden bg-[linear-gradient(180deg,#120d09,#18110d)] py-14 md:py-28"
+    >
       <img
         src={assetUrl("/assets/plates/paper-grain.jpg")}
         alt=""
@@ -37,16 +40,16 @@ export function FeaturedProducts() {
       />
 
       <div className="relative mx-auto max-w-[1440px] space-y-11 px-5 md:space-y-16 md:px-10">
-        <div id="mate-collection">
+        <div id="mate-collection" className="scroll-mt-28">
           <SectionHeader kicker="Mate collection" title="Bộ sưu tập Trà Mate" />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-2 md:gap-5 lg:grid-cols-3">
             {mateProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product} compactMobile />
             ))}
           </div>
         </div>
 
-        <div id="promo-products">
+        <div id="promo-products" className="scroll-mt-28">
           <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-[#d6b36a]/20 bg-[#d6b36a]/10 px-4 py-2 text-sm font-semibold text-[#f0d5ae]">
             <span className="rounded-full bg-[#b5502f] px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-white">
               Today Only
@@ -59,16 +62,16 @@ export function FeaturedProducts() {
             title="Trà túi lọc khuyến mại"
             body="Mỗi sản phẩm khuyến mại đều hiển thị rõ giá gốc, giá giảm và thông tin ưu đãi để khách dễ chốt đơn."
           />
-          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-2 md:gap-5 lg:grid-cols-4">
             {promotionProducts.map((product) => (
               <ProductCard key={product.id} product={product} compactMobile />
             ))}
           </div>
         </div>
 
-        <div id="bundle">
+        <div id="bundle" className="scroll-mt-28">
           <SectionHeader kicker="Combo khuyến mại" title="Combo khuyến mại" />
-          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-2 md:gap-5 lg:grid-cols-4">
             {comboProducts.map((product) => (
               <ProductCard key={product.id} product={product} compactMobile />
             ))}

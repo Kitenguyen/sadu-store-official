@@ -2,7 +2,10 @@ import { categories } from "../lib/products";
 
 export function ProductCategories() {
   return (
-    <section id="categories" className="mx-auto max-w-[1440px] px-5 py-14 md:px-10 md:py-28">
+    <section
+      id="categories"
+      className="mx-auto max-w-[1440px] scroll-mt-24 px-5 py-14 md:px-10 md:py-28"
+    >
       <div className="mb-7 flex items-end justify-between gap-6 md:mb-10">
         <div>
           <p className="mb-3 font-mono text-xs font-medium uppercase tracking-[0.16em] text-[#D6B36A]">

@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useCart } from "../lib/cart-context";
-import {
-  formatVnd,
-  getProductSchema,
-  type Product,
-} from "../lib/products";
+import { formatVnd, getProductSchema, type Product } from "../lib/products";
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -58,15 +54,26 @@ export function ProductCard({
 }) {
   const { addToCart, checkoutNow, toggleFavorite, favorites, notifyCartFx } = useCart();
   const [quantity, setQuantity] = useState(1);
-  const [justAdded, setJustAdded] = useState(false);
   const [flyState, setFlyState] = useState<FlyState | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const isFavorite = favorites.has(product.id);
 
   const schemaJson = useMemo(() => JSON.stringify(getProductSchema(product)), [product]);
+  const shellClass = compactMobile ? "rounded-[18px] md:rounded-[22px]" : "rounded-[22px]";
+  const pillTextClass = compactMobile
+    ? "px-2 py-1 text-[10px] md:px-2.5 md:text-[11px]"
+    : "px-2.5 py-1 text-[11px]";
+  const contentClass = compactMobile ? "gap-1.5 p-3 md:gap-2 md:p-4" : "gap-2.5 p-4";
+  const titleClass = compactMobile
+    ? "min-h-[2.45rem] text-[0.95rem] leading-[1.3] md:min-h-[2.6rem] md:text-sm"
+    : "min-h-[2.8rem] text-base leading-[1.35] md:min-h-[2.6rem] md:text-sm";
+  const priceClass = compactMobile
+    ? "text-[1.08rem] leading-6 md:text-[1.25rem] md:leading-7"
+    : "text-[1.12rem] leading-6 md:text-[1.25rem] md:leading-7";
 
   useEffect(() => {
     if (!flyState) return;
+
     const start = window.setTimeout(() => {
       const el = document.getElementById(`fly-${product.id}`);
       if (el) {
@@ -74,10 +81,12 @@ export function ProductCard({
         el.style.opacity = "0.15";
       }
     }, 20);
+
     const end = window.setTimeout(() => {
       setFlyState(null);
       notifyCartFx();
     }, 700);
+
     return () => {
       window.clearTimeout(start);
       window.clearTimeout(end);
@@ -86,11 +95,11 @@ export function ProductCard({
 
   const handleAdd = (event?: React.MouseEvent<HTMLButtonElement>) => {
     addToCart(product.id, quantity);
-    setJustAdded(true);
-    window.setTimeout(() => setJustAdded(false), 1600);
 
     const anchor = document.getElementById("cart-icon-anchor");
-    const cardImage = (event?.currentTarget.closest(".group")?.querySelector("img") as HTMLImageElement | null) ?? null;
+    const cardImage =
+      (event?.currentTarget.closest(".group")?.querySelector("img") as HTMLImageElement | null) ??
+      null;
     if (!anchor || !cardImage) return;
 
     const startRect = cardImage.getBoundingClientRect();
@@ -108,15 +117,11 @@ export function ProductCard({
     }
   };
 
-  const handleBuyNow = () => {
-    checkoutNow(product.id, quantity);
-  };
-
   return (
     <>
       <article
         id={product.slug}
-        className="group relative flex h-full flex-col overflow-hidden rounded-[22px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_-28px_rgba(30,91,56,0.32)]"
+        className={`group relative flex h-full flex-col overflow-hidden bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_-28px_rgba(30,91,56,0.32)] ${shellClass}`}
       >
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schemaJson }} />
 
@@ -125,7 +130,11 @@ export function ProductCard({
           <img
             src={product.image}
             srcSet={`${product.image} 640w, ${product.image} 960w`}
-            sizes={compactMobile ? "(max-width: 640px) 50vw, 25vw" : "(max-width: 1024px) 50vw, 33vw"}
+            sizes={
+              compactMobile
+                ? "(max-width: 767px) 50vw, (max-width: 1024px) 50vw, 25vw"
+                : "(max-width: 767px) 50vw, (max-width: 1024px) 50vw, 33vw"
+            }
             alt={product.name}
             loading="lazy"
             decoding="async"
@@ -134,7 +143,9 @@ export function ProductCard({
           />
 
           {product.badge ? (
-            <span className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-[11px] font-semibold ${badgeStyles(product.badge)}`}>
+            <span
+              className={`absolute left-3 top-3 rounded-full font-semibold ${pillTextClass} ${badgeStyles(product.badge)}`}
+            >
               {product.badge}
             </span>
           ) : null}
@@ -143,7 +154,9 @@ export function ProductCard({
             type="button"
             aria-label={isFavorite ? "Bỏ yêu thích" : "Yêu thích"}
             onClick={() => toggleFavorite(product.id)}
-            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur transition active:scale-90"
+            className={`absolute right-3 top-3 flex items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur transition active:scale-90 ${
+              compactMobile ? "h-9 w-9 md:h-8 md:w-8" : "h-11 w-11 md:h-8 md:w-8"
+            }`}
           >
             <svg
               width="15"
@@ -162,34 +175,42 @@ export function ProductCard({
           </button>
         </div>
 
-        <div className={`flex flex-1 flex-col ${compactMobile ? "gap-1.5 p-3 sm:gap-2 sm:p-4" : "gap-2 p-4"}`}>
+        <div className={`flex flex-1 flex-col ${contentClass}`}>
           <div className="flex items-center justify-between gap-2">
-            <span className="rounded-full bg-[#1E5B38]/8 px-2.5 py-1 text-[11px] font-semibold text-[#1E5B38]">
+            <span
+              className={`rounded-full bg-[#1E5B38]/8 font-semibold text-[#1E5B38] ${pillTextClass}`}
+            >
               {product.brand}
             </span>
             <div className="flex items-center gap-1.5">
               {product.discount ? (
-                <span className="rounded-full bg-[#b5502f]/10 px-2.5 py-1 text-[11px] font-bold text-[#b5502f]">
+                <span
+                  className={`rounded-full bg-[#b5502f]/10 font-bold text-[#b5502f] ${pillTextClass}`}
+                >
                   -{product.discount}%
                 </span>
               ) : null}
-              <span className="rounded-full bg-[#F4F2EB] px-2.5 py-1 text-[11px] font-medium text-[#222222]/65">
+              <span
+                className={`rounded-full bg-[#F4F2EB] font-medium text-[#222222]/65 ${pillTextClass}`}
+              >
                 Còn hàng
               </span>
             </div>
           </div>
 
-          <h3
-            className={`line-clamp-2 font-semibold text-[#222222] ${compactMobile ? "min-h-[2.5rem] text-[13px] leading-5 sm:min-h-[2.6rem] sm:text-sm" : "min-h-[2.6rem] text-sm"}`}
-          >
+          <h3 className={`line-clamp-2 font-semibold text-[#222222] ${titleClass}`}>
             {product.name}
           </h3>
 
-          <p className={`line-clamp-2 text-xs leading-relaxed text-[#222222]/55 ${compactMobile ? "" : ""}`}>
+          <p
+            className={`line-clamp-2 leading-[1.45] text-[#222222]/55 ${
+              compactMobile ? "text-[13px] md:text-sm" : "text-sm"
+            }`}
+          >
             {product.shortDescription}
           </p>
 
-          <div className="flex items-center gap-1.5">
+          <div className={`flex items-center gap-1.5 ${compactMobile ? "text-[11px]" : ""}`}>
             <Stars rating={product.rating} />
             <span className="text-xs font-medium text-[#222222]/80">{product.rating.toFixed(1)}</span>
             <span className="text-xs text-[#222222]/50">({product.reviewCount})</span>
@@ -198,35 +219,39 @@ export function ProductCard({
           <div className="flex items-end justify-between gap-3 pt-1">
             <div className="flex min-w-0 flex-col">
               {product.oldPrice ? (
-                <span className="text-xs text-[#222222]/40 line-through">{formatVnd(product.oldPrice)}</span>
+                <span className="text-[13px] text-[#222222]/40 line-through">
+                  {formatVnd(product.oldPrice)}
+                </span>
               ) : (
-                <span className="text-xs text-transparent">.</span>
+                <span className="text-[13px] text-transparent">.</span>
               )}
-              <span className={`${compactMobile ? "text-sm sm:text-base" : "text-base"} font-bold text-[#d12f2f]`}>
+              <span className={`font-bold text-[#d12f2f] ${priceClass}`}>
                 {formatVnd(product.price)}
               </span>
             </div>
-            <span className="rounded-full border border-black/8 px-2.5 py-1 text-[11px] font-medium text-[#222222]/65">
+            <span className="rounded-full border border-black/8 px-2.5 py-1 text-[12px] font-medium text-[#222222]/65">
               {product.size}
             </span>
           </div>
 
           <div className="mt-auto flex items-center gap-2 pt-2">
-            <div className={`items-center rounded-full border border-black/10 ${compactMobile ? "hidden sm:flex" : "flex"}`}>
+            <div className="hidden items-center rounded-full border border-black/10 md:flex">
               <button
                 type="button"
                 aria-label="Giảm số lượng"
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="flex h-8 w-8 items-center justify-center text-[#222222]/60 transition active:scale-90"
+                className="flex h-11 w-11 items-center justify-center text-[#222222]/60 transition active:scale-90"
               >
-                −
+                -
               </button>
-              <span className="w-6 text-center text-sm font-medium">{quantity}</span>
+              <span className="inline-flex h-11 min-w-[2.5rem] items-center justify-center px-1 text-center text-sm font-semibold leading-none text-[#222222]">
+                {quantity}
+              </span>
               <button
                 type="button"
                 aria-label="Tăng số lượng"
                 onClick={() => setQuantity((q) => Math.min(9, q + 1))}
-                className="flex h-8 w-8 items-center justify-center text-[#222222]/60 transition active:scale-90"
+                className="flex h-11 w-11 items-center justify-center text-[#222222]/60 transition active:scale-90"
               >
                 +
               </button>
@@ -235,20 +260,35 @@ export function ProductCard({
             <button
               type="button"
               onClick={handleAdd}
-              className={`relative overflow-hidden rounded-full border border-[#1E5B38]/15 bg-[#F7F5EE] text-xs font-semibold text-[#1E5B38] transition hover:bg-[#EDE8D8] active:scale-[0.98] ${compactMobile ? "w-full py-2.5" : "flex-1 py-2"}`}
+              className="hidden min-h-[44px] flex-1 rounded-full border border-[#1E5B38]/15 bg-[#F7F5EE] px-4 py-2.5 text-sm font-semibold text-[#1E5B38] transition hover:bg-[#EDE8D8] active:scale-[0.98] md:block"
             >
-              <span className="pointer-events-none absolute inset-0 scale-0 rounded-full bg-[#1E5B38]/8 transition-transform duration-500 group-active:scale-150" />
-              <span className="relative z-10">Thêm vào giỏ</span>
+              Thêm vào giỏ
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={handleBuyNow}
-            className={`mt-1 w-full rounded-full bg-[#222222] py-2.5 text-xs font-semibold text-white transition hover:bg-[#1E5B38] active:scale-[0.98] ${compactMobile ? "hidden sm:block" : ""}`}
-          >
-            Mua ngay
-          </button>
+          <div className="mt-1 flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => checkoutNow(product.id, quantity)}
+              data-product-primary-cta="true"
+              className={`w-full rounded-full bg-[#222222] px-4 font-semibold text-white transition hover:bg-[#1E5B38] active:scale-[0.98] ${
+                compactMobile
+                  ? "py-3 text-[15px] md:min-h-[44px] md:py-3 md:text-sm"
+                  : "py-3.5 text-base md:min-h-[44px] md:py-3 md:text-sm"
+              }`}
+            >
+              Mua ngay
+            </button>
+            <button
+              type="button"
+              onClick={handleAdd}
+              className={`w-full rounded-full border border-[#1E5B38]/15 bg-[#F7F5EE] px-4 font-semibold text-[#1E5B38] transition hover:bg-[#EDE8D8] active:scale-[0.98] md:hidden ${
+                compactMobile ? "py-2.5 text-[14px]" : "py-3 text-base"
+              }`}
+            >
+              Thêm vào giỏ
+            </button>
+          </div>
         </div>
       </article>
 
@@ -270,4 +310,3 @@ export function ProductCard({
     </>
   );
 }
-

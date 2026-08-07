@@ -42,19 +42,13 @@ export function SiteFooter() {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">
                   Chứng nhận website
                 </p>
-                <div className="mt-3 flex items-center gap-3">
+                <div className="mt-3 flex items-center">
                   <img
                     src={assetUrl("/assets/brand/logo-bct.avif")}
                     alt="Logo Bộ Công Thương"
                     loading="lazy"
                     className="h-12 w-auto rounded-[12px] bg-white p-1.5"
                   />
-                  <div>
-                    <p className="text-xs font-semibold text-white/82">Đã gắn logo Bộ Công Thương</p>
-                    <p className="mt-1 text-xs leading-5 text-white/62">
-                      Hiển thị ở footer để tăng độ tin cậy khi khách xem landing page trên điện thoại và desktop.
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
