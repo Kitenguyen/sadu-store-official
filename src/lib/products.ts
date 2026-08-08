@@ -117,6 +117,23 @@ export const mateProducts: Product[] = [
       "Xạ đen kết hợp lá sen và hoa sen khô, cho vị trà thanh, hậu ngọt nhẹ, hương sen thoang thoảng dễ chịu.",
     benefits: ["Hương sen thoang thoảng", "Vị trà thanh", "Hậu ngọt nhẹ"],
   }),
+  toProduct({
+    id: "combo-mate-hoa-cuc-3-tang-1",
+    sku: "COMBO-MATEHC-3T1",
+    slug: "combo-tra-mate-xa-den-hoa-cuc-3-tang-1",
+    name: "Combo 3 táº·ng 1 Â· TrÃ  Mate Xáº¡ Äen Hoa CÃºc",
+    category: "combo",
+    image: assetUrl("/assets/products/tra-xa-den-hoa-cuc.jpg"),
+    images: [assetUrl("/assets/products/tra-xa-den-hoa-cuc.jpg")],
+    price: 447000,
+    rating: 4.8,
+    reviewCount: 112,
+    badge: "COMBO",
+    size: "150g",
+    shortDescription: "Hoa cÃºc â€¢ Dá»‹u Ãªm â€¢ Combo dÃ¹ng hÃ ng ngÃ y",
+    description: "Combo Mate Xáº¡ Äen Hoa CÃºc dÃ nh cho khÃ¡ch thÃ­ch tÃ¡ch trÃ  dá»‹u Ãªm, hÆ°Æ¡ng cÃºc nháº¹ vÃ  muá»‘n mua tiáº¿t kiá»‡m hÆ¡n.",
+    benefits: ["HÆ°Æ¡ng cÃºc dá»‹u Ãªm", "Dá»… uá»‘ng buá»•i tá»‘i", "Æ¯u Ä‘Ã£i 3 táº·ng 1"],
+  }),
 ];
 
 export const promotionProducts: Product[] = [
@@ -615,4 +632,3 @@ export function getProductSchema(product: Product) {
     },
   };
 }
-

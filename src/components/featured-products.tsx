@@ -2,6 +2,16 @@ import { comboProducts, mateProducts, promotionProducts } from "../lib/products"
 import { assetUrl } from "../lib/site";
 import { ProductCard } from "./product-card";
 
+const mateComboProducts = comboProducts.filter((product) =>
+  [
+    "combo-mate-xa-den-3-tang-1",
+    "combo-mate-la-sen-3-tang-1",
+    "combo-mate-hoa-cuc-3-tang-1",
+  ].includes(product.id),
+);
+
+const mateCollectionProducts = [...mateProducts, ...mateComboProducts];
+
 function SectionHeader({
   kicker,
   title,
@@ -43,7 +53,7 @@ export function FeaturedProducts() {
         <div id="mate-collection" className="scroll-mt-28">
           <SectionHeader kicker="Mate collection" title="Bộ sưu tập Trà Mate" />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-2 md:gap-5 lg:grid-cols-3">
-            {mateProducts.map((product) => (
+            {mateCollectionProducts.map((product) => (
               <ProductCard key={product.id} product={product} compactMobile />
             ))}
           </div>

@@ -441,7 +441,7 @@ function CheckoutModal() {
                         required
                         value={customer.name}
                         onChange={(e) => setCustomer((prev) => ({ ...prev, name: e.target.value }))}
-                        className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#1E5B38]"
+                        className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-[#222222] outline-none transition placeholder:text-[#222222]/40 focus:border-[#1E5B38]"
                         placeholder="Nhập họ và tên"
                       />
                     </label>
@@ -453,7 +453,7 @@ function CheckoutModal() {
                         onChange={(e) =>
                           setCustomer((prev) => ({ ...prev, phone: e.target.value }))
                         }
-                        className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#1E5B38]"
+                        className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-[#222222] outline-none transition placeholder:text-[#222222]/40 focus:border-[#1E5B38]"
                         placeholder="0355532863"
                       />
                     </label>
@@ -468,7 +468,7 @@ function CheckoutModal() {
                       onChange={(e) =>
                         setCustomer((prev) => ({ ...prev, address: e.target.value }))
                       }
-                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#1E5B38]"
+                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-[#222222] outline-none transition placeholder:text-[#222222]/40 focus:border-[#1E5B38]"
                       placeholder="Số nhà, thôn/xóm, xã/phường, quận/huyện, tỉnh/thành"
                     />
                   </label>
@@ -479,7 +479,7 @@ function CheckoutModal() {
                       rows={2}
                       value={customer.note}
                       onChange={(e) => setCustomer((prev) => ({ ...prev, note: e.target.value }))}
-                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#1E5B38]"
+                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-[#222222] outline-none transition placeholder:text-[#222222]/40 focus:border-[#1E5B38]"
                       placeholder="Ví dụ: Gọi trước khi giao, giao giờ hành chính..."
                     />
                   </label>
@@ -503,7 +503,7 @@ function CheckoutModal() {
                       <input
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                        className="w-full rounded-2xl border border-[#D6B36A]/40 bg-[#fffdf8] px-4 py-3 text-sm font-semibold tracking-[0.08em] text-[#1E5B38] outline-none transition focus:border-[#1E5B38]"
+                        className="w-full rounded-2xl border border-[#D6B36A]/40 bg-[#fffdf8] px-4 py-3 text-sm font-semibold tracking-[0.08em] text-[#222222] outline-none transition placeholder:text-[#222222]/40 focus:border-[#1E5B38]"
                         placeholder="Nhập mã SONGLANH"
                       />
                       <button
