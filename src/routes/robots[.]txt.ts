@@ -1,15 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { SITE_URL } from '../lib/site'
+import { getRequestSiteUrl } from '../lib/site'
 
 export const Route = createFileRoute('/robots.txt')({
   server: {
     handlers: {
       GET: async ({ request }) => {
+        const siteUrl = getRequestSiteUrl(request)
         const body = [
           'User-agent: *',
           'Allow: /sadu-store-official',
           '',
-          `Sitemap: ${SITE_URL}/sitemap.xml`,
+          `Sitemap: ${siteUrl}/sitemap.xml`,
         ].join('\n')
         return new Response(body, {
           headers: {
