@@ -24,10 +24,14 @@ import { StructuredData } from "../components/StructuredData";
 import { WhyChooseUs } from "../components/why-choose-us";
 import { trackViewContent } from "../lib/analytics";
 import { CartProvider } from "../lib/cart-context";
+import { resolveMobileHeroVariant } from "../lib/mobile-hero-content";
 import { products } from "../lib/products";
 import { assetUrl, SITE_ORIGIN, SITE_URL } from "../lib/site";
 
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    hero: typeof search.hero === "string" ? search.hero : undefined,
+  }),
   head: () => ({
     links: [
       {
@@ -251,10 +255,7 @@ function TrustBadgesBar() {
           "Không chất bảo quản",
           "Giao hàng toàn quốc",
         ].map((item) => (
-          <span
-            key={item}
-            className="rounded-full border border-white/8 bg-white/4 px-3 py-1.5"
-          >
+          <span key={item} className="rounded-full border border-white/8 bg-white/4 px-3 py-1.5">
             {item}
           </span>
         ))}
@@ -263,7 +264,7 @@ function TrustBadgesBar() {
   );
 }
 
-function DesktopSections() {
+function DesktopSections({ variant }: { variant: ReturnType<typeof resolveMobileHeroVariant> }) {
   return (
     <>
       <TrustBadgesBar />
@@ -273,7 +274,7 @@ function DesktopSections() {
         <PromoBanner />
         <Certifications />
         <ProductCategories />
-        <FeaturedProducts />
+        <FeaturedProducts variant={variant} />
         <WhyChooseUs />
         <FarmStory />
         <Reviews />
@@ -284,11 +285,11 @@ function DesktopSections() {
   );
 }
 
-function MobileSections() {
+function MobileSections({ variant }: { variant: ReturnType<typeof resolveMobileHeroVariant> }) {
   return (
     <div className="relative">
       <SongLanhJourney />
-      <FeaturedProducts />
+      <FeaturedProducts variant={variant} />
       <TrustBadgesBar />
       <IngredientsSection />
       <Certifications />
@@ -303,9 +304,11 @@ function MobileSections() {
 }
 
 function Index() {
+  const { hero } = Route.useSearch();
   const [isMobileLayout, setIsMobileLayout] = useState(() =>
     typeof window !== "undefined" ? window.matchMedia("(max-width: 767px)").matches : false,
   );
+  const mobileHeroVariant = resolveMobileHeroVariant(hero);
 
   useEffect(() => {
     trackViewContent();
@@ -332,12 +335,16 @@ function Index() {
         <SiteNav />
         <main id="main-content">
           <div className="md:hidden">
-            <MobileHero />
+            <MobileHero variant={mobileHeroVariant} />
           </div>
           <div className="hidden md:block">
             <ScrollScrub scenes={SCENES} theme={THEME} />
           </div>
-          {isMobileLayout ? <MobileSections /> : <DesktopSections />}
+          {isMobileLayout ? (
+            <MobileSections variant={mobileHeroVariant} />
+          ) : (
+            <DesktopSections variant={mobileHeroVariant} />
+          )}
         </main>
         <CartDrawer />
         <CouponWidget />

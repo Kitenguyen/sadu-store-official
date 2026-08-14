@@ -131,12 +131,31 @@ export const mateProducts: Product[] = [
     badge: "COMBO",
     size: "150g",
     shortDescription: "Hoa cÃºc â€¢ Dá»‹u Ãªm â€¢ Combo dÃ¹ng hÃ ng ngÃ y",
-    description: "Combo Mate Xáº¡ Äen Hoa CÃºc dÃ nh cho khÃ¡ch thÃ­ch tÃ¡ch trÃ  dá»‹u Ãªm, hÆ°Æ¡ng cÃºc nháº¹ vÃ  muá»‘n mua tiáº¿t kiá»‡m hÆ¡n.",
+    description:
+      "Combo Mate Xáº¡ Äen Hoa CÃºc dÃ nh cho khÃ¡ch thÃ­ch tÃ¡ch trÃ  dá»‹u Ãªm, hÆ°Æ¡ng cÃºc nháº¹ vÃ  muá»‘n mua tiáº¿t kiá»‡m hÆ¡n.",
     benefits: ["HÆ°Æ¡ng cÃºc dá»‹u Ãªm", "Dá»… uá»‘ng buá»•i tá»‘i", "Æ¯u Ä‘Ã£i 3 táº·ng 1"],
   }),
 ];
 
 export const promotionProducts: Product[] = [
+  toProduct({
+    id: "promo-ca-gai-leo-xa-den-500g",
+    sku: "CGL-XD-500G",
+    slug: "tra-ca-gai-leo-xa-den-500g",
+    name: "Trà Cà Gai Leo Xạ Đen SADU",
+    category: "khuyen-mai",
+    image: assetUrl("/assets/hero/ca-gai-leo-xa-den-mobile.png"),
+    images: [assetUrl("/assets/hero/ca-gai-leo-xa-den-mobile.png")],
+    price: 218000,
+    rating: 4.9,
+    reviewCount: 194,
+    badge: "SALE",
+    size: "500g",
+    shortDescription: "Thanh mat • De uong • Muc gia de vao don",
+    description:
+      "Goi 500g phu hop cho khach muon thu truoc dong tra ca gai leo xa den voi muc chi tieu gon hon nhung van du dung deu trong thoi gian ngan.",
+    benefits: ["Thanh mat de uong", "Muc gia de vao don", "Phu hop dung thu truoc"],
+  }),
   toProduct({
     id: "promo-ca-gai-leo-xa-den-1kg",
     sku: "CGL-XD-1KG",
@@ -154,6 +173,24 @@ export const promotionProducts: Product[] = [
     shortDescription: "Mát gan • Thanh lọc • Hỗ trợ chức năng gan",
     description: "Mát gan, hỗ trợ tăng cường chức năng gan, thanh lọc cơ thể.",
     benefits: ["Mát gan", "Thanh lọc cơ thể", "Hỗ trợ chức năng gan"],
+  }),
+  toProduct({
+    id: "promo-ca-gai-leo-500g",
+    sku: "CGL-TL-500G",
+    slug: "tra-ca-gai-leo-500g",
+    name: "Tra Tui Loc Ca Gai Leo SADU",
+    category: "khuyen-mai",
+    image: assetUrl("/assets/hero/ca-gai-leo-mobile.webp"),
+    images: [assetUrl("/assets/hero/ca-gai-leo-mobile.webp")],
+    price: 218000,
+    rating: 4.8,
+    reviewCount: 207,
+    badge: "SALE",
+    size: "500g",
+    shortDescription: "Thanh moc • De uong • Muc gia de vao don",
+    description:
+      "Phien ban 500g giup khach bat dau voi tra ca gai leo o muc gia gon hon, phu hop cho nhu cau mua thu hoac dung trong thoi gian ngan.",
+    benefits: ["Vi moc de uong", "De bat dau", "Muc gia gon hon"],
   }),
   toProduct({
     id: "promo-ca-gai-leo-1kg",
@@ -303,6 +340,24 @@ export const comboProducts: Product[] = [
     benefits: ["Không kháng sinh", "Ăn thảo dược sạch", "Cholesterol xấu thấp"],
   }),
   toProduct({
+    id: "combo-trung-ga-thao-duoc-6-tang-2-tia-to",
+    sku: "COMBO-TGTD-6T2-TT",
+    slug: "combo-trung-ga-thao-duoc-6-tang-2-tia-to",
+    name: "Combo 6 tang 2 · Trung ga thao duoc SADU + 1 hop ca gai leo tia to 100g",
+    category: "combo",
+    image: assetUrl("/assets/products/combo-trung-ga-thao-duoc-6-tang-2-tia-to.png"),
+    images: [assetUrl("/assets/products/combo-trung-ga-thao-duoc-6-tang-2-tia-to.png")],
+    price: 717000,
+    rating: 4.9,
+    reviewCount: 64,
+    badge: "COMBO",
+    size: "6 hop + qua tang",
+    shortDescription: "Khong khang sinh • Mua so luong lon • Tang 1 hop ca gai leo tia to 100g",
+    description:
+      "Combo cho gia dinh mua so luong lon, gom 6 hop trung ga thao duoc, duoc tang them 2 hop trung va kem 1 hop ca gai leo tia to 100g de tang gia tri chao ban.",
+    benefits: ["Khong khang sinh", "Tiet kiem khi mua nhieu", "Tang 1 hop ca gai leo tia to 100g"],
+  }),
+  toProduct({
     id: "combo-la-oi-2-tang-1",
     sku: "COMBO-LO-2T1",
     slug: "combo-ca-gai-leo-la-oi-2-tang-1",
@@ -316,7 +371,8 @@ export const comboProducts: Product[] = [
     badge: "COMBO",
     size: "Combo quà tặng",
     shortDescription: "Tiêu hóa nhẹ • Dễ uống • Combo tiết kiệm",
-    description: "Combo lá ổi dành cho khách ưu tiên tiêu hóa nhẹ, vị trà dễ uống và chi phí tiết kiệm hơn.",
+    description:
+      "Combo lá ổi dành cho khách ưu tiên tiêu hóa nhẹ, vị trà dễ uống và chi phí tiết kiệm hơn.",
     benefits: ["Hỗ trợ tiêu hóa", "Vị trà dễ uống", "Combo tiết kiệm"],
   }),
   toProduct({
@@ -333,7 +389,8 @@ export const comboProducts: Product[] = [
     badge: "COMBO",
     size: "Combo quà tặng",
     shortDescription: "Dễ uống • Mua nhiều lợi hơn • Tiết kiệm dài hạn",
-    description: "Combo lá ổi số lượng lớn cho khách dùng đều mỗi ngày và muốn tối ưu chi phí tốt hơn.",
+    description:
+      "Combo lá ổi số lượng lớn cho khách dùng đều mỗi ngày và muốn tối ưu chi phí tốt hơn.",
     benefits: ["Dễ uống mỗi ngày", "Ưu đãi số lượng", "Tiết kiệm dài hạn"],
   }),
   toProduct({
@@ -350,7 +407,8 @@ export const comboProducts: Product[] = [
     badge: "COMBO",
     size: "250g",
     shortDescription: "Thảo dược sạch • Đúng hình hộp • Mua số lượng lớn",
-    description: "Combo dây đau xương cà gai leo dành cho khách mua số lượng lớn với packshot hộp chuẩn sản phẩm thực tế.",
+    description:
+      "Combo dây đau xương cà gai leo dành cho khách mua số lượng lớn với packshot hộp chuẩn sản phẩm thực tế.",
     benefits: ["Thảo dược sạch", "Đúng hình hộp", "Ưu đãi số lượng lớn"],
   }),
   toProduct({
@@ -401,7 +459,8 @@ export const comboProducts: Product[] = [
     badge: "COMBO",
     size: "Combo quà tặng",
     shortDescription: "Xạ đen • Mua nhiều lợi hơn • Dễ nhận diện",
-    description: "Combo xạ đen số lượng lớn cho khách cần tối ưu giá và dùng đều trong thời gian dài.",
+    description:
+      "Combo xạ đen số lượng lớn cho khách cần tối ưu giá và dùng đều trong thời gian dài.",
     benefits: ["Mua nhiều lợi hơn", "Dễ nhận diện sản phẩm", "Phù hợp dùng dài hạn"],
   }),
   toProduct({
@@ -435,7 +494,8 @@ export const comboProducts: Product[] = [
     badge: "COMBO",
     size: "Combo quà tặng",
     shortDescription: "Ưu đãi sâu • Lá ổi dễ uống • Chốt đơn nhanh",
-    description: "Ưu đãi sâu cho khách chốt số lượng lớn dòng lá ổi với mức giá tốt hơn theo combo.",
+    description:
+      "Ưu đãi sâu cho khách chốt số lượng lớn dòng lá ổi với mức giá tốt hơn theo combo.",
     benefits: ["Ưu đãi sâu", "Dễ uống", "Chốt đơn nhanh"],
   }),
   toProduct({
@@ -452,7 +512,8 @@ export const comboProducts: Product[] = [
     badge: "COMBO",
     size: "Combo quà tặng",
     shortDescription: "Bồi bổ • Tăng đề kháng • Combo tiết kiệm",
-    description: "Combo đinh lăng phù hợp khách cần mua dài ngày và ưu tiên các dòng trà bồi bổ cơ thể.",
+    description:
+      "Combo đinh lăng phù hợp khách cần mua dài ngày và ưu tiên các dòng trà bồi bổ cơ thể.",
     benefits: ["Bồi bổ cơ thể", "Tăng đề kháng", "Combo tiết kiệm"],
   }),
   toProduct({
@@ -469,7 +530,8 @@ export const comboProducts: Product[] = [
     badge: "COMBO",
     size: "150g",
     shortDescription: "Xạ đen • Thanh nhẹ • Tặng thêm hấp dẫn",
-    description: "Combo Mate Xạ Đen phù hợp khách yêu thích vị mộc mạc và muốn mua dùng hoặc làm quà.",
+    description:
+      "Combo Mate Xạ Đen phù hợp khách yêu thích vị mộc mạc và muốn mua dùng hoặc làm quà.",
     benefits: ["Thanh nhẹ", "Hương vị mộc mạc", "Ưu đãi tặng thêm"],
   }),
   toProduct({
@@ -486,7 +548,8 @@ export const comboProducts: Product[] = [
     badge: "COMBO",
     size: "150g",
     shortDescription: "Premium • Dùng dài ngày • Tặng thêm giá trị",
-    description: "Combo cao cấp cho dòng Mate Xạ Đen, phù hợp khách mua dài ngày hoặc chọn làm quà premium.",
+    description:
+      "Combo cao cấp cho dòng Mate Xạ Đen, phù hợp khách mua dài ngày hoặc chọn làm quà premium.",
     benefits: ["Dùng dài ngày", "Premium", "Tặng thêm giá trị"],
   }),
   toProduct({
@@ -520,7 +583,8 @@ export const comboProducts: Product[] = [
     badge: "COMBO",
     size: "150g",
     shortDescription: "Hương sen • Thanh nhẹ • Combo quà tặng",
-    description: "Combo quà tặng số lượng lớn cho khách yêu thích hương lá sen thanh mát và phong cách premium.",
+    description:
+      "Combo quà tặng số lượng lớn cho khách yêu thích hương lá sen thanh mát và phong cách premium.",
     benefits: ["Hương sen", "Thanh nhẹ", "Combo quà tặng"],
   }),
 ];
@@ -533,7 +597,7 @@ export const categories: CategoryCard[] = [
     name: "Bộ sưu tập Mate",
     image: assetUrl("/assets/products/tra-xa-den.jpg"),
     count: mateProducts.length,
-    href: "#mate-collection",
+    href: "#featured-collection",
   },
   {
     id: "khuyen-mai",

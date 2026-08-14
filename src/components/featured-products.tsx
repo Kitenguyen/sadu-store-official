@@ -1,26 +1,11 @@
-import { comboProducts, mateProducts, promotionProducts } from "../lib/products";
+import { MOBILE_HERO_CONTENT, type MobileHeroVariant } from "../lib/mobile-hero-content";
+import { comboProducts, products, promotionProducts } from "../lib/products";
 import { assetUrl } from "../lib/site";
 import { ProductCard } from "./product-card";
 
-const mateComboProducts = comboProducts.filter((product) =>
-  [
-    "combo-mate-xa-den-3-tang-1",
-    "combo-mate-la-sen-3-tang-1",
-    "combo-mate-hoa-cuc-3-tang-1",
-  ].includes(product.id),
-);
+const productLookup = new Map(products.map((product) => [product.id, product]));
 
-const mateCollectionProducts = [...mateProducts, ...mateComboProducts];
-
-function SectionHeader({
-  kicker,
-  title,
-  body,
-}: {
-  kicker: string;
-  title: string;
-  body?: string;
-}) {
+function SectionHeader({ kicker, title, body }: { kicker: string; title: string; body?: string }) {
   return (
     <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
@@ -36,7 +21,13 @@ function SectionHeader({
   );
 }
 
-export function FeaturedProducts() {
+export function FeaturedProducts({ variant = "default" }: { variant?: MobileHeroVariant }) {
+  const collectionHero = MOBILE_HERO_CONTENT[variant];
+  const collectionProducts = collectionHero.collectionProductIds
+    .map((productId) => productLookup.get(productId))
+    .filter((product): product is NonNullable<typeof product> => Boolean(product));
+  const collectionGridClass = collectionProducts.length <= 2 ? "lg:grid-cols-2" : "lg:grid-cols-3";
+
   return (
     <section
       id="products"
@@ -50,10 +41,15 @@ export function FeaturedProducts() {
       />
 
       <div className="relative mx-auto max-w-[1440px] space-y-11 px-5 md:space-y-16 md:px-10">
-        <div id="mate-collection" className="scroll-mt-28">
-          <SectionHeader kicker="Mate collection" title="Bộ sưu tập Trà Mate" />
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-2 md:gap-5 lg:grid-cols-3">
-            {mateCollectionProducts.map((product) => (
+        <div id="featured-collection" className="scroll-mt-28">
+          <div id="mate-collection" className="relative top-[-7rem] h-0" aria-hidden="true" />
+          <SectionHeader
+            kicker={collectionHero.collectionKicker}
+            title={collectionHero.collectionTitle}
+            body={collectionHero.collectionBody}
+          />
+          <div className={`grid grid-cols-2 gap-3 md:grid-cols-2 md:gap-5 ${collectionGridClass}`}>
+            {collectionProducts.map((product) => (
               <ProductCard key={product.id} product={product} compactMobile />
             ))}
           </div>
