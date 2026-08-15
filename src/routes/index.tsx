@@ -17,6 +17,7 @@ import { ProductCategories } from "../components/product-categories";
 import { PromoBanner } from "../components/promo-banner";
 import { Reviews } from "../components/reviews";
 import { ScrollScrub, type ScrollScrubScene } from "../components/scroll-scrub/scroll-scrub";
+import { SocialProofToast } from "../components/social-proof-toast";
 import { SiteFooter } from "../components/site-footer";
 import { SiteNav } from "../components/site-nav";
 import { SongLanhJourney } from "../components/song-lanh-journey";
@@ -346,6 +347,7 @@ function Index() {
             <DesktopSections variant={mobileHeroVariant} />
           )}
         </main>
+        <SocialProofToast variant={mobileHeroVariant} />
         <CartDrawer />
         <CouponWidget />
         <SupportBubble />
