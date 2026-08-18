@@ -101,7 +101,7 @@ export function SocialProofToast({ variant = "default" }: { variant?: MobileHero
           scheduleNext(TOAST_RESUME_DELAY);
         }
       }}
-      className={`fixed bottom-[calc(5.75rem+env(safe-area-inset-bottom))] left-4 z-50 flex w-[min(360px,calc(100vw-2rem))] items-center gap-3 rounded-[22px] border border-[#C98A3D]/20 bg-[rgba(255,253,248,0.96)] px-4 py-4 text-left shadow-[0_24px_54px_-28px_rgba(18,60,38,0.45)] backdrop-blur-md transition duration-300 md:bottom-44 md:left-5 ${
+      className={`fixed bottom-[calc(5.9rem+env(safe-area-inset-bottom))] left-3 z-50 flex w-[min(292px,calc(100vw-1rem))] items-center gap-2.5 rounded-[18px] border border-[#C98A3D]/16 bg-[rgba(255,253,248,0.95)] px-3 py-3 text-left shadow-[0_18px_40px_-24px_rgba(18,60,38,0.4)] backdrop-blur-md transition duration-300 md:bottom-44 md:left-5 md:w-[min(360px,calc(100vw-2rem))] md:gap-3 md:rounded-[22px] md:px-4 md:py-4 ${
         visible
           ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
           : "pointer-events-none translate-y-6 scale-[0.96] opacity-0"
@@ -115,12 +115,12 @@ export function SocialProofToast({ variant = "default" }: { variant?: MobileHero
           clearHideTimer();
           scheduleNext(TOAST_CLOSE_DELAY);
         }}
-        className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full text-sm text-[#6f6457] transition hover:bg-[#ede4d3]"
+        className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full text-xs text-[#6f6457] transition hover:bg-[#ede4d3] md:right-2 md:top-2 md:h-7 md:w-7 md:text-sm"
       >
         ×
       </button>
 
-      <div className="h-14 w-14 shrink-0 overflow-hidden rounded-[18px] bg-[#efe8d8]">
+      <div className="h-11 w-11 shrink-0 overflow-hidden rounded-[14px] bg-[#efe8d8] md:h-14 md:w-14 md:rounded-[18px]">
         <img
           src={currentItem.avatar}
           alt={currentItem.customer}
@@ -131,12 +131,14 @@ export function SocialProofToast({ variant = "default" }: { variant?: MobileHero
         />
       </div>
 
-      <div className="min-w-0 pr-5">
-        <p className="line-clamp-1 text-[14px] font-bold text-[#184f33]">{currentItem.customer}</p>
-        <p className="mt-1 line-clamp-2 text-[13px] font-semibold leading-5 text-[#43764f]">
+      <div className="min-w-0 pr-4 md:pr-5">
+        <p className="line-clamp-1 text-[12px] font-bold text-[#184f33] md:text-[14px]">
+          {currentItem.customer}
+        </p>
+        <p className="mt-0.5 line-clamp-2 text-[11px] font-semibold leading-4 text-[#43764f] md:mt-1 md:text-[13px] md:leading-5">
           vừa đặt {currentItem.combo}
         </p>
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-[#766b5f]">
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-[#766b5f] md:mt-2 md:gap-x-3 md:gap-y-1 md:text-[12px]">
           <span>{currentItem.city}</span>
           <span>{currentItem.timeAgo}</span>
         </div>

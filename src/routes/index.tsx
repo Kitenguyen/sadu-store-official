@@ -10,6 +10,7 @@ import {
   CouponWidget,
   MobilePurchaseBar,
   SupportBubble,
+  ZaloCheckoutHint,
 } from "../components/floating-widgets";
 import { IngredientsSection } from "../components/ingredients-section";
 import { MobileHero } from "../components/mobile-hero";
@@ -351,6 +352,7 @@ function Index() {
         <CartDrawer />
         <CouponWidget />
         <SupportBubble />
+        <ZaloCheckoutHint />
         <MobilePurchaseBar />
       </div>
     </CartProvider>

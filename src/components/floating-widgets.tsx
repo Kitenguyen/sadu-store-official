@@ -19,6 +19,7 @@ const APPS_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbxPJagkaTKGJ2w2uc7QKh9wh1JVCQ5pt6wm4hXZegpMHHkz2ZKTdTYoAROCYrG3BZ4/exec";
 const VOUCHER_STORAGE_KEY = "sadu-voucher-songlanh-claimed";
 const VOUCHER_UNLOCK_EVENT = "sadu:voucher-unlocked";
+const ZALO_HINT_DISMISSED_KEY = "sadu-zalo-checkout-hint-dismissed";
 
 function normalizeVoucherCode(value: string) {
   return value.trim().toUpperCase();
@@ -807,6 +808,81 @@ export function SupportBubble() {
           className="h-9 w-9 rounded-full object-cover"
         />
       </button>
+    </div>
+  );
+}
+
+export function ZaloCheckoutHint() {
+  const [visible, setVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const syncViewport = () => {
+      setIsMobile(window.matchMedia("(max-width: 767px)").matches);
+    };
+
+    syncViewport();
+    window.addEventListener("resize", syncViewport);
+
+    const dismissed = window.sessionStorage.getItem(ZALO_HINT_DISMISSED_KEY) === "1";
+    if (dismissed) {
+      return () => window.removeEventListener("resize", syncViewport);
+    }
+
+    const timer = window.setTimeout(() => {
+      setVisible(true);
+    }, 30000);
+
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("resize", syncViewport);
+    };
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <div
+      className={`fixed right-3 z-40 w-[min(230px,calc(100vw-1rem))] rounded-[18px] border border-[#1E5B38]/10 bg-[rgba(255,255,255,0.96)] px-3 py-2.5 text-[#1f3428] shadow-[0_16px_36px_-22px_rgba(0,0,0,0.35)] backdrop-blur-md md:right-5 md:w-[250px] ${
+        isMobile
+          ? "bottom-[calc(10.6rem+env(safe-area-inset-bottom))]"
+          : "bottom-28"
+      }`}
+    >
+      <div className="flex items-start gap-2.5">
+        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#eaf6ef] text-[11px] font-bold text-[#1E5B38]">
+          ZL
+        </div>
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1E5B38]/62">
+            Hỗ trợ nhanh
+          </p>
+          <p className="mt-1 text-[12px] leading-4 text-[#2b4034]/82">
+            Đặt hàng qua Zalo nếu bạn gặp khó khăn khi thanh toán.
+          </p>
+          <div className="mt-2 flex items-center gap-2">
+            <a
+              href={ZALO_URL}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => trackContactClick("zalo", "checkout_hint")}
+              className="inline-flex rounded-full bg-[#1E5B38] px-3 py-1.5 text-[11px] font-semibold text-white"
+            >
+              Mở Zalo
+            </a>
+            <button
+              type="button"
+              onClick={() => {
+                window.sessionStorage.setItem(ZALO_HINT_DISMISSED_KEY, "1");
+                setVisible(false);
+              }}
+              className="text-[11px] font-medium text-[#5d675f]"
+            >
+              Ẩn
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
