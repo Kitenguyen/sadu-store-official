@@ -11,7 +11,6 @@ const MOBILE_HERO_QUERY_ALIASES: Record<string, MobileHeroQueryVariant> = {
   "ca-gai-leo-tien": "ca-gai-leo",
   "trung-ga-thao-duoc": "trung-ga-thao-duoc",
 };
-
 export interface MobileHeroContent {
   badge: string;
   title: string;
