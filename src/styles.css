@@ -1,0 +1,51 @@
+@layer reset, theme, base, components, utilities;
+
+@import "tailwindcss" source(none);
+@source "../src";
+
+@import "tw-animate-css";
+
+@theme {
+  --spacing: 0.25rem;
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-forest: #1e5b38;
+  --color-forest-dark: #123c24;
+  --color-sage: #bfd8c3;
+  --color-cream: #faf9f5;
+  --color-gold: #d6b36a;
+  --color-charcoal: #222222;
+
+  --radius-card: 22px;
+  --radius-pill: 999px;
+}
+
+:root {
+  color-scheme: light;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-cream);
+    color: var(--color-charcoal);
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--color-cream);
+    color: var(--color-charcoal);
+    font-family: var(--font-sans);
+  }
+
+  * {
+    border-color: color-mix(in srgb, var(--color-charcoal) 12%, transparent);
+  }
+
+  ::selection {
+    background-color: var(--color-sage);
+    color: var(--color-forest-dark);
+  }
+}
+
+@import "./components/scroll-scrub/scroll-scrub.css";

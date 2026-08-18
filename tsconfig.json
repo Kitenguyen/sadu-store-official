@@ -1,0 +1,55 @@
+{
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "eslint.config.js"],
+  "exclude": [
+    "src/components/asset-library.tsx",
+    "src/components/before-after-compare/**/*",
+    "src/components/composer/**/*",
+    "src/components/dropzone/**/*",
+    "src/components/gallery/**/*",
+    "src/components/generation-card/**/*",
+    "src/components/generation-detail.tsx",
+    "src/components/history-grid.tsx",
+    "src/components/icon-tile/**/*",
+    "src/components/media-card/**/*",
+    "src/components/prompt-box/**/*",
+    "src/components/rail-footer/**/*",
+    "src/components/setting-trigger/**/*",
+    "src/components/step-rail/**/*",
+    "src/components/template-modal/**/*",
+    "src/components/template-picker.tsx",
+    "src/components/upload-field/**/*",
+    "src/layouts/**/*",
+    "src/lib/higgsfield-error-reporting.ts",
+    "src/lib/higgsfield-generation-results.ts",
+    "src/lib/quanta-material-icons.ts",
+    "src/module/design-inspector/**/*"
+  ],
+  "compilerOptions": {
+    "target": "ES2022",
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
+
+    /* Bundler mode */
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": false,
+    "noEmit": true,
+    // Lets the root route import app-meta.json (page metadata committed by the
+    // marketplace meta API) at build time.
+    "resolveJsonModule": true,
+
+    /* Linting */
+    "skipLibCheck": true,
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@higgsfield-ai/icons/*": ["./src/lib/quanta-material-icons.ts"]
+    }
+  }
+}
