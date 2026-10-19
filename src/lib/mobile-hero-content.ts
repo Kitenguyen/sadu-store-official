@@ -108,9 +108,9 @@ export const MOBILE_HERO_CONTENT: Record<MobileHeroVariant, MobileHeroContent> =
     secondaryHref: "#combo-trung-ga-thao-duoc-6-tang-2-tia-to",
     footerTags: ["Trứng thơm ít tanh", "Bữa ăn ngon mỗi ngày", "Từ trang trại SADU"],
     image: assetUrl("/assets/hero/trung-ga-thao-duoc-mobile.png"),
-    imageAlt: "Hộp trứng gà thảo dược SADU 12 quả trên nền trắng",
-    imagePanelClass: "bg-[linear-gradient(180deg,rgba(248,241,230,0.96),rgba(82,57,42,0.98))] p-3",
-    imageClass: "object-contain object-center",
+    imageAlt: "Trứng gà không kháng sinh SADU từ đàn gà ăn thảo dược",
+    imagePanelClass: "bg-[#18381e] p-0",
+    imageClass: "object-cover object-center",
     collectionKicker: "Combo trứng gà thảo dược",
     collectionTitle: "Bộ sưu tập Combo Trứng Gà Thảo Dược",
     collectionBody:
