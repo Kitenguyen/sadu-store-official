@@ -21,7 +21,13 @@ function SectionHeader({ kicker, title, body }: { kicker: string; title: string;
   );
 }
 
-export function FeaturedProducts({ variant = "default" }: { variant?: MobileHeroVariant }) {
+export function FeaturedProducts({
+  variant = "default",
+  eggMode = false,
+}: {
+  variant?: MobileHeroVariant;
+  eggMode?: boolean;
+}) {
   const collectionHero = MOBILE_HERO_CONTENT[variant];
   const collectionProducts = collectionHero.collectionProductIds
     .map((productId) => productLookup.get(productId))
@@ -31,7 +37,9 @@ export function FeaturedProducts({ variant = "default" }: { variant?: MobileHero
   return (
     <section
       id="products"
-      className="relative scroll-mt-24 overflow-hidden bg-[linear-gradient(180deg,#120d09,#18110d)] py-14 md:py-28"
+      className={`relative scroll-mt-24 overflow-hidden bg-[linear-gradient(180deg,#120d09,#18110d)] py-14 md:py-28 ${
+        eggMode ? "pb-28 md:pb-28" : ""
+      }`}
     >
       <img
         src={assetUrl("/assets/plates/paper-grain.jpg")}

@@ -266,7 +266,13 @@ function TrustBadgesBar() {
   );
 }
 
-function DesktopSections({ variant }: { variant: ReturnType<typeof resolveMobileHeroVariant> }) {
+function DesktopSections({
+  variant,
+  eggMode = false,
+}: {
+  variant: ReturnType<typeof resolveMobileHeroVariant>;
+  eggMode?: boolean;
+}) {
   return (
     <>
       <TrustBadgesBar />
@@ -276,7 +282,7 @@ function DesktopSections({ variant }: { variant: ReturnType<typeof resolveMobile
         <PromoBanner />
         <Certifications />
         <ProductCategories />
-        <FeaturedProducts variant={variant} />
+        <FeaturedProducts variant={variant} eggMode={eggMode} />
         <WhyChooseUs />
         <FarmStory />
         <Reviews />
@@ -287,11 +293,17 @@ function DesktopSections({ variant }: { variant: ReturnType<typeof resolveMobile
   );
 }
 
-function MobileSections({ variant }: { variant: ReturnType<typeof resolveMobileHeroVariant> }) {
+function MobileSections({
+  variant,
+  eggMode = false,
+}: {
+  variant: ReturnType<typeof resolveMobileHeroVariant>;
+  eggMode?: boolean;
+}) {
   return (
     <div className="relative">
       <SongLanhJourney />
-      <FeaturedProducts variant={variant} />
+      <FeaturedProducts variant={variant} eggMode={eggMode} />
       <TrustBadgesBar />
       <IngredientsSection />
       <Certifications />
@@ -307,6 +319,10 @@ function MobileSections({ variant }: { variant: ReturnType<typeof resolveMobileH
 
 function Index() {
   const { hero } = Route.useSearch();
+  return <LandingPage hero={hero} />;
+}
+
+export function LandingPage({ hero, eggMode = false }: { hero?: string; eggMode?: boolean }) {
   const [isMobileLayout, setIsMobileLayout] = useState(() =>
     typeof window !== "undefined" ? window.matchMedia("(max-width: 767px)").matches : false,
   );
@@ -343,16 +359,16 @@ function Index() {
             <ScrollScrub scenes={SCENES} theme={THEME} />
           </div>
           {isMobileLayout ? (
-            <MobileSections variant={mobileHeroVariant} />
+            <MobileSections variant={mobileHeroVariant} eggMode={eggMode} />
           ) : (
-            <DesktopSections variant={mobileHeroVariant} />
+            <DesktopSections variant={mobileHeroVariant} eggMode={eggMode} />
           )}
         </main>
         <SocialProofToast variant={mobileHeroVariant} />
         <CartDrawer />
         <CouponWidget />
         <SupportBubble />
-        <ZaloCheckoutHint />
+        {!eggMode ? <ZaloCheckoutHint /> : null}
         <MobilePurchaseBar />
       </div>
     </CartProvider>
